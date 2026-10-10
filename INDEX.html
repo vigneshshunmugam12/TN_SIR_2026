@@ -1,462 +1,70 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tamil Nadu SIR 2026 | Full 234 Assembly Constituencies Dashboard</title>
-  
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
-    body { font-family: 'Inter', sans-serif; }
-    .mono { font-family: 'JetBrains Mono', monospace; }
-  </style>
-</head>
-<body class="bg-slate-950 text-slate-100 min-h-screen antialiased selection:bg-rose-500 selection:text-white">
-
-  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-      <div>
-        <div class="flex items-center gap-2">
-          <span class="px-2.5 py-0.5 rounded text-xs font-semibold bg-rose-500/20 text-rose-400 border border-rose-500/30">
-            ECI SPECIAL INTENSIVE REVISION
-          </span>
-          <span class="text-xs text-slate-400 mono">ALL 234 CONSTITUENCIES</span>
-        </div>
-        <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-white mt-1">
-          Tamil Nadu SIR 2026 Electoral Roll Observatory
-        </h1>
-      </div>
-    </div>
-  </header>
-
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
-
-    <section class="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <div class="bg-slate-900/70 border border-slate-800 p-5 rounded-xl">
-        <div class="text-xs font-medium text-slate-400 uppercase tracking-wider">Gross SIR Deletions</div>
-        <div class="text-2xl sm:text-3xl font-extrabold text-rose-400 mono mt-2">97,37,831</div>
-        <div class="text-xs text-slate-500 mt-1">Across all 234 ACs (~15.2%)</div>
-      </div>
-      <div class="bg-slate-900/70 border border-slate-800 p-5 rounded-xl">
-        <div class="text-xs font-medium text-slate-400 uppercase tracking-wider">Shifted / Absent (ASDD)</div>
-        <div class="text-2xl sm:text-3xl font-extrabold text-amber-400 mono mt-2">66,44,881</div>
-        <div class="text-xs text-slate-500 mt-1">68.24% of all purged records</div>
-      </div>
-      <div class="bg-slate-900/70 border border-slate-800 p-5 rounded-xl">
-        <div class="text-xs font-medium text-slate-400 uppercase tracking-wider">Final Roll (06/04/2026)</div>
-        <div class="text-2xl sm:text-3xl font-extrabold text-emerald-400 mono mt-2">5,73,43,291</div>
-        <div class="text-xs text-slate-500 mt-1">+6.35L added via Form 6</div>
-      </div>
-      <div class="bg-slate-900/70 border border-slate-800 p-5 rounded-xl">
-        <div class="text-xs font-medium text-slate-400 uppercase tracking-wider">Youth (18–19 Cohort)</div>
-        <div class="text-2xl sm:text-3xl font-extrabold text-cyan-400 mono mt-2">14,59,039</div>
-        <div class="text-xs text-slate-500 mt-1">Fresh first-time registrations</div>
-      </div>
-    </section>
-
-    <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div class="bg-slate-900/80 border border-slate-800 p-6 rounded-2xl">
-        <h3 class="text-base font-semibold text-white">Deletions by Administrative Category</h3>
-        <p class="text-xs text-slate-400 mb-4">Total statewide deletions: 97.38 Lakhs</p>
-        <div class="h-64 flex items-center justify-center">
-          <canvas id="categoryChart"></canvas>
-        </div>
-      </div>
-      <div class="bg-slate-900/80 border border-slate-800 p-6 rounded-2xl">
-        <h3 class="text-base font-semibold text-white">Top 8 High-Deletion Corridors vs Winning Margins</h3>
-        <p class="text-xs text-slate-400 mb-4">Gross Deletion Count vs 2021 Assembly Victory Margin</p>
-        <div class="h-64">
-          <canvas id="marginChart"></canvas>
-        </div>
-      </div>
-    </section>
-
-    <section class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 space-y-4">
-      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div>
-          <h3 class="text-lg font-bold text-white flex items-center gap-2">
-            Constituency Master Explorer
-            <span id="matchCountBadge" class="px-2 py-0.5 rounded text-xs bg-slate-800 text-slate-300 mono border border-slate-700">234 Seats</span>
-          </h3>
-          <p class="text-xs text-slate-400">Search and audit all 234 Assembly Segments</p>
-        </div>
-        <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
-          <input type="text" id="searchInput" placeholder="Search AC name..." class="bg-slate-950 border border-slate-700 px-3.5 py-1.5 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 w-full sm:w-60 transition">
-          <select id="districtFilter" class="bg-slate-950 border border-slate-700 px-3 py-1.5 rounded-lg text-sm text-white focus:outline-none focus:border-rose-500 transition">
-            <option value="ALL">All Districts</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="overflow-x-auto rounded-xl border border-slate-800 max-h-[600px] overflow-y-auto">
-        <table class="w-full text-left text-sm text-slate-300">
-          <thead class="bg-slate-950/90 text-xs font-semibold text-slate-400 uppercase tracking-wider mono sticky top-0 z-20 border-b border-slate-800">
-            <tr>
-              <th class="py-3 px-4">AC #</th>
-              <th class="py-3 px-4">Constituency</th>
-              <th class="py-3 px-4">District</th>
-              <th class="py-3 px-4 text-right">2021 Roll</th>
-              <th class="py-3 px-4 text-right text-rose-400">SIR Deletions</th>
-              <th class="py-3 px-4 text-right text-amber-300">Shifted</th>
-              <th class="py-3 px-4 text-right text-slate-400">Deceased</th>
-              <th class="py-3 px-4 text-right text-emerald-400">Final 2026 Roll</th>
-              <th class="py-3 px-4 text-right text-cyan-300">Win Margin</th>
-            </tr>
-          </thead>
-          <tbody id="constituencyTableBody" class="divide-y divide-slate-800 mono text-xs"></tbody>
-        </table>
-      </div>
-    </section>
-  </main>
-
-  <script>
-    // Embedded Data Array
-    const constituencyData = [
-  { ac: 1, name: "Gummidipoondi", district: "Thiruvallur", electors21: "2,98,784", deletions: 38412, shifted: 26110, dead: 10842, multi: 1460, roll26: "2,84,120", margin: 26938 },
-  { ac: 2, name: "Ponneri (SC)", district: "Thiruvallur", electors21: "2,78,419", deletions: 35120, shifted: 23410, dead: 10420, multi: 1290, roll26: "2,65,410", margin: 9689 },
-  { ac: 3, name: "Tiruttani", district: "Thiruvallur", electors21: "2,95,142", deletions: 41250, shifted: 27810, dead: 12100, multi: 1340, roll26: "2,79,840", margin: 29253 },
-  { ac: 4, name: "Thiruvallur", district: "Thiruvallur", electors21: "2,74,310", deletions: 44180, shifted: 31200, dead: 11410, multi: 1570, roll26: "2,62,490", margin: 28015 },
-  { ac: 5, name: "Poonamallee (SC)", district: "Thiruvallur", electors21: "3,58,218", deletions: 46865, shifted: 25628, dead: 18450, multi: 2787, roll26: "3,68,634", margin: 94110 },
-  { ac: 6, name: "Avadi", district: "Thiruvallur", electors21: "4,49,152", deletions: 89420, shifted: 67840, dead: 18910, multi: 2670, roll26: "4,12,380", margin: 24275 },
-  { ac: 7, name: "Maduravoyal", district: "Thiruvallur", electors21: "4,52,195", deletions: 117368, shifted: 103876, dead: 11971, multi: 1521, roll26: "3,73,283", margin: 31721 },
-  { ac: 8, name: "Ambattur", district: "Thiruvallur", electors21: "3,95,410", deletions: 98450, shifted: 81210, dead: 14780, multi: 2460, roll26: "3,48,190", margin: 40723 },
-  { ac: 9, name: "Madavaram", district: "Thiruvallur", electors21: "4,54,474", deletions: 109499, shifted: 86319, dead: 20024, multi: 3156, roll26: "4,31,796", margin: 57071 },
-  { ac: 10, name: "Thiruvottiyur", district: "Thiruvallur", electors21: "3,09,812", deletions: 61240, shifted: 47820, dead: 11840, multi: 1580, roll26: "2,78,140", margin: 37011 },
-  { ac: 11, name: "Dr. Radhakrishnan Nagar", district: "Chennai", electors21: "2,58,419", deletions: 74120, shifted: 62410, dead: 10110, multi: 1600, roll26: "2,05,420", margin: 42598 },
-  { ac: 12, name: "Perambur", district: "Chennai", electors21: "3,15,480", deletions: 92450, shifted: 80110, dead: 10890, multi: 1450, roll26: "2,46,120", margin: 51976 },
-  { ac: 13, name: "Kolathur", district: "Chennai", electors21: "2,84,720", deletions: 81450, shifted: 71200, dead: 8910, multi: 1340, roll26: "2,24,190", margin: 70384 },
-  { ac: 14, name: "Villivakkam", district: "Chennai", electors21: "2,54,190", deletions: 78910, shifted: 69840, dead: 7890, multi: 1180, roll26: "1,98,410", margin: 37237 },
-  { ac: 15, name: "Thiru-Vi-Ka-Nagar (SC)", district: "Chennai", electors21: "2,21,480", deletions: 65120, shifted: 56940, dead: 7210, multi: 970, roll26: "1,74,210", margin: 27280 },
-  { ac: 16, name: "Egmore (SC)", district: "Chennai", electors21: "1,98,410", deletions: 61240, shifted: 53890, dead: 6540, multi: 810, roll26: "1,52,490", margin: 30568 },
-  { ac: 17, name: "Royapuram", district: "Chennai", electors21: "1,94,820", deletions: 58910, shifted: 51240, dead: 6890, multi: 780, roll26: "1,51,200", margin: 27723 },
-  { ac: 18, name: "Harbour", district: "Chennai", electors21: "1,76,410", deletions: 54120, shifted: 47910, dead: 5490, multi: 720, roll26: "1,34,510", margin: 27274 },
-  { ac: 19, name: "Chepauk-Thiruvallikeni", district: "Chennai", electors21: "2,34,810", deletions: 69450, shifted: 61840, dead: 6710, multi: 900, roll26: "1,83,490", margin: 69341 },
-  { ac: 20, name: "Thousand Lights", district: "Chennai", electors21: "2,41,560", deletions: 76120, shifted: 67840, dead: 7410, multi: 870, roll26: "1,84,120", margin: 32462 },
-  { ac: 21, name: "Anna Nagar", district: "Chennai", electors21: "2,86,090", deletions: 118287, shifted: 108829, dead: 8819, multi: 639, roll26: "1,88,861", margin: 27445 },
-  { ac: 22, name: "Virugampakkam", district: "Chennai", electors21: "2,91,691", deletions: 110824, shifted: 101429, dead: 8029, multi: 1366, roll26: "2,00,578", margin: 18367 },
-  { ac: 23, name: "Saidapet", district: "Chennai", electors21: "2,79,410", deletions: 89450, shifted: 79810, dead: 8710, multi: 930, roll26: "2,08,120", margin: 29408 },
-  { ac: 24, name: "Thiyagarayanagar", district: "Chennai", electors21: "2,48,190", deletions: 84120, shifted: 74910, dead: 8420, multi: 790, roll26: "1,81,490", margin: 13744 },
-  { ac: 25, name: "Mylapore", district: "Chennai", electors21: "2,74,310", deletions: 88450, shifted: 78910, dead: 8640, multi: 900, roll26: "2,04,180", margin: 12633 },
-  { ac: 26, name: "Velachery", district: "Chennai", electors21: "3,14,578", deletions: 127521, shifted: 112589, dead: 13429, multi: 1503, roll26: "2,17,171", margin: 4352 },
-  { ac: 27, name: "Shozhinganallur", district: "Chengalpattu", electors21: "6,98,893", deletions: 218439, shifted: 190851, dead: 22742, multi: 4846, roll26: "5,53,905", margin: 35405 },
-  { ac: 28, name: "Alandur", district: "Chengalpattu", electors21: "3,89,410", deletions: 94120, shifted: 81240, dead: 11450, multi: 1430, roll26: "3,28,490", margin: 40571 },
-  { ac: 29, name: "Sriperumbudur (SC)", district: "Kanchipuram", electors21: "3,54,810", deletions: 54120, shifted: 38410, dead: 14120, multi: 1590, roll26: "3,39,120", margin: 10879 },
-  { ac: 30, name: "Pallavaram", district: "Chengalpattu", electors21: "4,36,239", deletions: 149786, shifted: 120948, dead: 23891, multi: 4947, roll26: "3,36,963", margin: 37783 },
-  { ac: 31, name: "Tambaram", district: "Chengalpattu", electors21: "4,15,663", deletions: 121128, shifted: 100266, dead: 17210, multi: 3652, roll26: "3,30,060", margin: 36824 },
-  { ac: 32, name: "Chengalpattu", district: "Chengalpattu", electors21: "4,18,450", deletions: 86450, shifted: 67120, dead: 17450, multi: 1880, roll26: "3,72,190", margin: 26656 },
-  { ac: 33, name: "Thiruporur", district: "Chengalpattu", electors21: "3,09,140", deletions: 48120, shifted: 34150, dead: 12480, multi: 1490, roll26: "2,98,410", margin: 949 },
-  { ac: 34, name: "Cheyyur (SC)", district: "Chengalpattu", electors21: "2,28,410", deletions: 28450, shifted: 16840, dead: 10540, multi: 1070, roll26: "2,19,410", margin: 4042 },
-  { ac: 35, name: "Madurantakam (SC)", district: "Chengalpattu", electors21: "2,31,450", deletions: 29120, shifted: 17450, dead: 10690, multi: 980, roll26: "2,23,120", margin: 3570 },
-  { ac: 36, name: "Uthiramerur", district: "Kanchipuram", electors21: "2,61,480", deletions: 31240, shifted: 18910, dead: 11410, multi: 920, roll26: "2,54,120", margin: 1622 },
-  { ac: 37, name: "Kanchipuram", district: "Kanchipuram", electors21: "3,18,450", deletions: 49810, shifted: 34120, dead: 14210, multi: 1480, roll26: "3,01,240", margin: 11595 },
-  { ac: 38, name: "Arakkonam (SC)", district: "Ranipet", electors21: "2,29,140", deletions: 31240, shifted: 18450, dead: 11780, multi: 1010, roll26: "2,21,480", margin: 27169 },
-  { ac: 39, name: "Sholinghur", district: "Ranipet", electors21: "2,78,410", deletions: 34120, shifted: 20110, dead: 12890, multi: 1120, roll26: "2,68,910", margin: 25698 },
-  { ac: 40, name: "Katpadi", district: "Vellore", electors21: "2,49,150", deletions: 37450, shifted: 23140, dead: 13120, multi: 1190, roll26: "2,39,120", margin: 746 },
-  { ac: 41, name: "Ranipet", district: "Ranipet", electors21: "2,68,410", deletions: 38910, shifted: 24510, dead: 13180, multi: 1220, roll26: "2,58,410", margin: 16498 },
-  { ac: 42, name: "Arcot", district: "Ranipet", electors21: "2,74,810", deletions: 36120, shifted: 21890, dead: 13120, multi: 1110, roll26: "2,64,190", margin: 19958 },
-  { ac: 43, name: "Vellore", district: "Vellore", electors21: "2,54,810", deletions: 48910, shifted: 33450, dead: 14120, multi: 1340, roll26: "2,38,120", margin: 9181 },
-  { ac: 44, name: "Anaikattu", district: "Vellore", electors21: "2,48,190", deletions: 31240, shifted: 18450, dead: 11840, multi: 950, roll26: "2,39,410", margin: 6360 },
-  { ac: 45, name: "Kilvaithinankuppam (SC)", district: "Vellore", electors21: "2,19,410", deletions: 26840, shifted: 15410, dead: 10610, multi: 820, roll26: "2,12,490", margin: 10582 },
-  { ac: 46, name: "Gudiyattam (SC)", district: "Vellore", electors21: "2,84,120", deletions: 38450, shifted: 24120, dead: 13180, multi: 1150, roll26: "2,74,190", margin: 6905 },
-  { ac: 47, name: "Vaniyambadi", district: "Tirupathur", electors21: "2,48,190", deletions: 34120, shifted: 21450, dead: 11650, multi: 1020, roll26: "2,39,120", margin: 4904 },
-  { ac: 48, name: "Ambur", district: "Tirupathur", electors21: "2,39,140", deletions: 33180, shifted: 20450, dead: 11810, multi: 920, roll26: "2,31,140", margin: 20232 },
-  { ac: 49, name: "Jolarpet", district: "Tirupathur", electors21: "2,49,150", deletions: 31240, shifted: 18940, dead: 11450, multi: 850, roll26: "2,41,120", margin: 1091 },
-  { ac: 50, name: "Tirupattur", district: "Tirupathur", electors21: "2,41,890", deletions: 29840, shifted: 17840, dead: 11180, multi: 820, roll26: "2,34,120", margin: 28240 },
-  { ac: 51, name: "Uthangarai (SC)", district: "Krishnagiri", electors21: "2,38,120", deletions: 27140, shifted: 15910, dead: 10450, multi: 780, roll26: "2,31,490", margin: 28387 },
-  { ac: 52, name: "Bargur", district: "Krishnagiri", electors21: "2,49,150", deletions: 31240, shifted: 18940, dead: 11450, multi: 850, roll26: "2,41,120", margin: 1262 },
-  { ac: 53, name: "Krishnagiri", district: "Krishnagiri", electors21: "2,68,410", deletions: 36840, shifted: 23140, dead: 12650, multi: 1050, roll26: "2,58,910", margin: 794 },
-  { ac: 54, name: "Veppanahalli", district: "Krishnagiri", electors21: "2,54,120", deletions: 28940, shifted: 17450, dead: 10690, multi: 800, roll26: "2,46,120", margin: 3054 },
-  { ac: 55, name: "Hosur", district: "Krishnagiri", electors21: "3,68,410", deletions: 74120, shifted: 58910, dead: 13410, multi: 1800, roll26: "3,39,120", margin: 12367 },
-  { ac: 56, name: "Thalli", district: "Krishnagiri", electors21: "2,48,190", deletions: 29840, shifted: 17890, dead: 11150, multi: 800, roll26: "2,40,190", margin: 56222 },
-  { ac: 57, name: "Palacode", district: "Dharmapuri", electors21: "2,39,140", deletions: 26840, shifted: 15840, dead: 10240, multi: 760, roll26: "2,32,140", margin: 28100 },
-  { ac: 58, name: "Pennagaram", district: "Dharmapuri", electors21: "2,48,150", deletions: 28410, shifted: 16940, dead: 10690, multi: 780, roll26: "2,41,120", margin: 21326 },
-  { ac: 59, name: "Dharmapuri", district: "Dharmapuri", electors21: "2,74,810", deletions: 36840, shifted: 23140, dead: 12690, multi: 1010, roll26: "2,64,190", margin: 26860 },
-  { ac: 60, name: "Pappireddippatti", district: "Dharmapuri", electors21: "2,68,410", deletions: 31240, shifted: 18910, dead: 11480, multi: 850, roll26: "2,59,120", margin: 36943 },
-  { ac: 61, name: "Harur (SC)", district: "Dharmapuri", electors21: "2,48,190", deletions: 28940, shifted: 17450, dead: 10710, multi: 780, roll26: "2,40,810", margin: 30362 },
-  { ac: 62, name: "Chengam (SC)", district: "Tiruvannamalai", electors21: "2,74,150", deletions: 31240, shifted: 18940, dead: 11450, multi: 850, roll26: "2,65,120", margin: 11570 },
-  { ac: 63, name: "Tiruvannamalai", district: "Tiruvannamalai", electors21: "2,84,120", deletions: 38450, shifted: 24120, dead: 13180, multi: 1150, roll26: "2,74,190", margin: 94673 },
-  { ac: 64, name: "Kilpennathur", district: "Tiruvannamalai", electors21: "2,58,410", deletions: 29840, shifted: 17840, dead: 11200, multi: 800, roll26: "2,50,190", margin: 26867 },
-  { ac: 65, name: "Kalasapakkam", district: "Tiruvannamalai", electors21: "2,48,190", deletions: 28410, shifted: 16940, dead: 10690, multi: 780, roll26: "2,41,120", margin: 9222 },
-  { ac: 66, name: "Polur", district: "Tiruvannamalai", electors21: "2,54,120", deletions: 29120, shifted: 17450, dead: 10890, multi: 780, roll26: "2,46,810", margin: 9725 },
-  { ac: 67, name: "Arani", district: "Tiruvannamalai", electors21: "2,78,410", deletions: 34120, shifted: 21240, dead: 11980, multi: 900, roll26: "2,68,910", margin: 3176 },
-  { ac: 68, name: "Cheyyar", district: "Tiruvannamalai", electors21: "2,74,810", deletions: 32450, shifted: 19840, dead: 11760, multi: 850, roll26: "2,65,190", margin: 12271 },
-  { ac: 69, name: "Vandavasi (SC)", district: "Tiruvannamalai", electors21: "2,48,150", deletions: 28940, shifted: 17450, dead: 10710, multi: 780, roll26: "2,40,810", margin: 35953 },
-  { ac: 70, name: "Gingee", district: "Viluppuram", electors21: "2,78,410", deletions: 31240, shifted: 18910, dead: 11480, multi: 850, roll26: "2,69,120", margin: 35808 },
-  { ac: 71, name: "Mailam", district: "Viluppuram", electors21: "2,38,120", deletions: 27140, shifted: 15910, dead: 10450, multi: 780, roll26: "2,31,490", margin: 2230 },
-  { ac: 72, name: "Tindivanam (SC)", district: "Viluppuram", electors21: "2,48,190", deletions: 29840, shifted: 17890, dead: 11150, multi: 800, roll26: "2,40,190", margin: 9753 },
-  { ac: 73, name: "Vanur (SC)", district: "Viluppuram", electors21: "2,39,140", deletions: 28410, shifted: 16940, dead: 10690, multi: 780, roll26: "2,31,140", margin: 21727 },
-  { ac: 74, name: "Villupuram", district: "Viluppuram", electors21: "2,74,810", deletions: 38450, shifted: 24120, dead: 13180, multi: 1150, roll26: "2,63,190", margin: 14868 },
-  { ac: 75, name: "Vikravandi", district: "Viluppuram", electors21: "2,41,890", deletions: 28940, shifted: 17450, dead: 10710, multi: 780, roll26: "2,34,120", margin: 6773 },
-  { ac: 76, name: "Tirukkoyilur", district: "Kallakurichi", electors21: "2,68,410", deletions: 31240, shifted: 18940, dead: 11450, multi: 850, roll26: "2,59,120", margin: 37980 },
-  { ac: 77, name: "Ulundurpettai", district: "Kallakurichi", electors21: "3,09,140", deletions: 38410, shifted: 23910, dead: 13410, multi: 1090, roll26: "2,98,410", margin: 5256 },
-  { ac: 78, name: "Rishivandiyam", district: "Kallakurichi", electors21: "2,74,150", deletions: 32450, shifted: 19840, dead: 11760, multi: 850, roll26: "2,65,120", margin: 41728 },
-  { ac: 79, name: "Sankarapuram", district: "Kallakurichi", electors21: "2,68,410", deletions: 31240, shifted: 18910, dead: 11480, multi: 850, roll26: "2,59,120", margin: 45963 },
-  { ac: 80, name: "Kallakurichi (SC)", district: "Kallakurichi", electors21: "2,84,120", deletions: 34120, shifted: 21240, dead: 11980, multi: 900, roll26: "2,74,190", margin: 25773 },
-  { ac: 81, name: "Gangavalli (SC)", district: "Salem", electors21: "2,31,450", deletions: 26840, shifted: 15840, dead: 10240, multi: 760, roll26: "2,24,120", margin: 7361 },
-  { ac: 82, name: "Attur (SC)", district: "Salem", electors21: "2,48,190", deletions: 29840, shifted: 17890, dead: 11150, multi: 800, roll26: "2,40,190", margin: 8257 },
-  { ac: 83, name: "Yercaud (ST)", district: "Salem", electors21: "2,84,120", deletions: 34120, shifted: 21240, dead: 11980, multi: 900, roll26: "2,74,190", margin: 22552 },
-  { ac: 84, name: "Omalur", district: "Salem", electors21: "2,95,140", deletions: 36840, shifted: 23140, dead: 12690, multi: 1010, roll26: "2,84,120", margin: 28737 },
-  { ac: 85, name: "Mettur", district: "Salem", electors21: "2,74,810", deletions: 33180, shifted: 20450, dead: 11810, multi: 920, roll26: "2,65,190", margin: 656 },
-  { ac: 86, name: "Edappadi", district: "Salem", electors21: "2,84,150", deletions: 32450, shifted: 19840, dead: 11760, multi: 850, roll26: "2,75,120", margin: 93802 },
-  { ac: 87, name: "Sankari", district: "Salem", electors21: "2,78,410", deletions: 34120, shifted: 21240, dead: 11980, multi: 900, roll26: "2,68,910", margin: 20045 },
-  { ac: 88, name: "Salem (West)", district: "Salem", electors21: "3,09,140", deletions: 54120, shifted: 39840, dead: 12890, multi: 1390, roll26: "2,84,120", margin: 22129 },
-  { ac: 89, name: "Salem (North)", district: "Salem", electors21: "2,84,120", deletions: 49810, shifted: 36120, dead: 12450, multi: 1240, roll26: "2,64,190", margin: 22588 },
-  { ac: 90, name: "Salem (South)", district: "Salem", electors21: "2,98,410", deletions: 52140, shifted: 38410, dead: 12450, multi: 1280, roll26: "2,76,120", margin: 22609 },
-  { ac: 91, name: "Veerapandi", district: "Salem", electors21: "2,61,480", deletions: 31240, shifted: 18910, dead: 11410, multi: 920, roll26: "2,54,120", margin: 19895 },
-  { ac: 92, name: "Rasipuram (SC)", district: "Namakkal", electors21: "2,38,120", deletions: 28410, shifted: 16940, dead: 10690, multi: 780, roll26: "2,30,190", margin: 1952 },
-  { ac: 93, name: "Senthamangalam (ST)", district: "Namakkal", electors21: "2,48,190", deletions: 29840, shifted: 17890, dead: 11150, multi: 800, roll26: "2,40,190", margin: 997 },
-  { ac: 94, name: "Namakkal", district: "Namakkal", electors21: "2,68,410", deletions: 36840, shifted: 23140, dead: 12690, multi: 1010, roll26: "2,58,410", margin: 27612 },
-  { ac: 95, name: "Paramathi-Velur", district: "Namakkal", electors21: "2,28,410", deletions: 27140, shifted: 15910, dead: 10450, multi: 780, roll26: "2,21,480", margin: 8011 },
-  { ac: 96, name: "Tiruchengodu", district: "Namakkal", electors21: "2,41,890", deletions: 31240, shifted: 18940, dead: 11450, multi: 850, roll26: "2,34,120", margin: 2862 },
-  { ac: 97, name: "Kumarapalayam", district: "Namakkal", electors21: "2,58,410", deletions: 34120, shifted: 21240, dead: 11980, multi: 900, roll26: "2,49,190", margin: 31646 },
-  { ac: 98, name: "Erode (East)", district: "Erode", electors21: "2,28,410", deletions: 48910, shifted: 36120, dead: 11450, multi: 1340, roll26: "2,05,420", margin: 8904 },
-  { ac: 99, name: "Erode (West)", district: "Erode", electors21: "2,84,120", deletions: 54120, shifted: 40110, dead: 12690, multi: 1320, roll26: "2,58,410", margin: 22089 },
-  { ac: 100, name: "Modakkurichi", district: "Erode", electors21: "2,38,120", deletions: 28410, shifted: 16940, dead: 10690, multi: 780, roll26: "2,30,190", margin: 281 },
-  { ac: 101, name: "Dharapuram (SC)", district: "Tiruppur", electors21: "2,61,480", deletions: 31240, shifted: 18910, dead: 11410, multi: 920, roll26: "2,53,120", margin: 1393 },
-  { ac: 102, name: "Kangayam", district: "Tiruppur", electors21: "2,58,410", deletions: 32450, shifted: 19840, dead: 11760, multi: 850, roll26: "2,50,190", margin: 7331 },
-  { ac: 103, name: "Perundurai", district: "Erode", electors21: "2,31,450", deletions: 28940, shifted: 17450, dead: 10710, multi: 780, roll26: "2,24,120", margin: 14507 },
-  { ac: 104, name: "Bhavani", district: "Erode", electors21: "2,48,190", deletions: 29840, shifted: 17890, dead: 11150, multi: 800, roll26: "2,40,190", margin: 14523 },
-  { ac: 105, name: "Anthiyur", district: "Erode", electors21: "2,21,480", deletions: 26840, shifted: 15840, dead: 10240, multi: 760, roll26: "2,15,420", margin: 1272 },
-  { ac: 106, name: "Gobichettipalayam", district: "Erode", electors21: "2,58,410", deletions: 31240, shifted: 18940, dead: 11450, multi: 850, roll26: "2,50,190", margin: 28563 },
-  { ac: 107, name: "Bhavanisagar (SC)", district: "Erode", electors21: "2,54,120", deletions: 29120, shifted: 17450, dead: 10890, multi: 780, roll26: "2,46,810", margin: 16008 },
-  { ac: 108, name: "Udhagamandalam", district: "Nilgiris", electors21: "2,09,140", deletions: 31240, shifted: 19840, dead: 10450, multi: 950, roll26: "1,98,410", margin: 5348 },
-  { ac: 109, name: "Gudalur (SC)", district: "Nilgiris", electors21: "1,94,820", deletions: 28410, shifted: 17890, dead: 9740, multi: 780, roll26: "1,85,120", margin: 1945 },
-  { ac: 110, name: "Coonoor", district: "Nilgiris", electors21: "1,88,410", deletions: 27140, shifted: 16940, dead: 9420, multi: 780, roll26: "1,79,120", margin: 4105 },
-  { ac: 111, name: "Mettupalayam", district: "Coimbatore", electors21: "2,98,410", deletions: 48910, shifted: 34120, dead: 13450, multi: 1340, roll26: "2,74,120", margin: 2456 },
-  { ac: 112, name: "Avanashi (SC)", district: "Tiruppur", electors21: "2,74,810", deletions: 38450, shifted: 24120, dead: 13180, multi: 1150, roll26: "2,63,190", margin: 50902 },
-  { ac: 113, name: "Tiruppur (North)", district: "Tiruppur", electors21: "3,89,410", deletions: 94120, shifted: 78910, dead: 13450, multi: 1760, roll26: "3,34,120", margin: 40102 },
-  { ac: 114, name: "Tiruppur (South)", district: "Tiruppur", electors21: "2,84,120", deletions: 71240, shifted: 58910, dead: 10980, multi: 1350, roll26: "2,38,120", margin: 1253 },
-  { ac: 115, name: "Palladam", district: "Tiruppur", electors21: "3,82,410", deletions: 112907, shifted: 82448, dead: 24571, multi: 5888, roll26: "3,41,200", margin: 32691 },
-  { ac: 116, name: "Sulur", district: "Coimbatore", electors21: "3,18,450", deletions: 61240, shifted: 47120, dead: 12690, multi: 1430, roll26: "2,89,120", margin: 31932 },
-  { ac: 117, name: "Kavundampalayam", district: "Coimbatore", electors21: "4,65,345", deletions: 123971, shifted: 106557, dead: 13864, multi: 3550, roll26: "4,22,138", margin: 9776 },
-  { ac: 118, name: "Coimbatore (North)", district: "Coimbatore", electors21: "3,41,890", deletions: 86450, shifted: 72140, dead: 12450, multi: 1860, roll26: "2,98,410", margin: 4001 },
-  { ac: 119, name: "Thondamuthur", district: "Coimbatore", electors21: "3,28,410", deletions: 64120, shifted: 49810, dead: 12890, multi: 1420, roll26: "2,94,120", margin: 41680 },
-  { ac: 120, name: "Coimbatore (South)", district: "Coimbatore", electors21: "2,54,120", deletions: 74120, shifted: 61240, dead: 11450, multi: 1430, roll26: "2,05,420", margin: 1728 },
-  { ac: 121, name: "Singanallur", district: "Coimbatore", electors21: "3,28,150", deletions: 81240, shifted: 67840, dead: 11980, multi: 1420, roll26: "2,78,190", margin: 10854 },
-  { ac: 122, name: "Kinathukadavu", district: "Coimbatore", electors21: "3,24,150", deletions: 48910, shifted: 34120, dead: 13450, multi: 1340, roll26: "3,01,240", margin: 1095 },
-  { ac: 123, name: "Pollachi", district: "Coimbatore", electors21: "2,28,410", deletions: 31240, shifted: 18940, dead: 11450, multi: 850, roll26: "2,20,190", margin: 1725 },
-  { ac: 124, name: "Valparai (SC)", district: "Coimbatore", electors21: "2,01,480", deletions: 28410, shifted: 17450, dead: 10180, multi: 780, roll26: "1,92,410", margin: 12235 },
-  { ac: 125, name: "Udumalaipettai", district: "Tiruppur", electors21: "2,68,410", deletions: 36840, shifted: 23140, dead: 12690, multi: 1010, roll26: "2,58,410", margin: 21895 },
-  { ac: 126, name: "Madathukulam", district: "Tiruppur", electors21: "2,38,120", deletions: 28410, shifted: 16940, dead: 10690, multi: 780, roll26: "2,30,190", margin: 6438 },
-  { ac: 127, name: "Palani", district: "Dindigul", electors21: "2,68,410", deletions: 34120, shifted: 21240, dead: 11980, multi: 900, roll26: "2,58,910", margin: 30056 },
-  { ac: 128, name: "Oddanchatram", district: "Dindigul", electors21: "2,41,890", deletions: 28940, shifted: 17450, dead: 10710, multi: 780, roll26: "2,34,120", margin: 28742 },
-  { ac: 129, name: "Athoor", district: "Dindigul", electors21: "2,84,120", deletions: 36840, shifted: 23140, dead: 12690, multi: 1010, roll26: "2,74,190", margin: 60224 },
-  { ac: 130, name: "Nilakkottai (SC)", district: "Dindigul", electors21: "2,31,450", deletions: 28410, shifted: 16940, dead: 10690, multi: 780, roll26: "2,24,120", margin: 27618 },
-  { ac: 131, name: "Natham", district: "Dindigul", electors21: "2,74,810", deletions: 32450, shifted: 19840, dead: 11760, multi: 850, roll26: "2,65,190", margin: 11932 },
-  { ac: 132, name: "Dindigul", district: "Dindigul", electors21: "2,78,410", deletions: 48910, shifted: 34120, dead: 13450, multi: 1340, roll26: "2,54,120", margin: 5591 },
-  { ac: 133, name: "Vedasandur", district: "Dindigul", electors21: "2,68,410", deletions: 31240, shifted: 18910, dead: 11480, multi: 850, roll26: "2,59,120", margin: 17553 },
-  { ac: 134, name: "Aravakurichi", district: "Karur", electors21: "2,19,410", deletions: 26840, shifted: 15840, dead: 10240, multi: 760, roll26: "2,12,490", margin: 24816 },
-  { ac: 135, name: "Karur", district: "Karur", electors21: "2,48,190", deletions: 38450, shifted: 24120, dead: 13180, multi: 1150, roll26: "2,36,190", margin: 12448 },
-  { ac: 136, name: "Krishnarayapuram (SC)", district: "Karur", electors21: "2,18,450", deletions: 27140, shifted: 16120, dead: 10240, multi: 780, roll26: "2,11,480", margin: 31625 },
-  { ac: 137, name: "Kulithalai", district: "Karur", electors21: "2,27,279", deletions: 16012, shifted: 8370, dead: 7120, multi: 522, roll26: "2,23,184", margin: 23540 },
-  { ac: 138, name: "Manapparai", district: "Tiruchirappalli", electors21: "2,84,120", deletions: 34120, shifted: 21240, dead: 11980, multi: 900, roll26: "2,74,190", margin: 12143 },
-  { ac: 139, name: "Srirangam", district: "Tiruchirappalli", electors21: "3,18,450", deletions: 48910, shifted: 34120, dead: 13450, multi: 1340, roll26: "2,94,120", margin: 19878 },
-  { ac: 140, name: "Tiruchirappalli (West)", district: "Tiruchirappalli", electors21: "2,74,810", deletions: 54120, shifted: 39840, dead: 12890, multi: 1390, roll26: "2,48,190", margin: 53129 },
-  { ac: 141, name: "Tiruchirappalli (East)", district: "Tiruchirappalli", electors21: "2,58,410", deletions: 51240, shifted: 37450, dead: 12450, multi: 1340, roll26: "2,34,120", margin: 53797 },
-  { ac: 142, name: "Thiruverumbur", district: "Tiruchirappalli", electors21: "2,98,410", deletions: 49810, shifted: 36120, dead: 12450, multi: 1240, roll26: "2,74,190", margin: 49697 },
-  { ac: 143, name: "Lalgudi", district: "Tiruchirappalli", electors21: "2,21,480", deletions: 26840, shifted: 15840, dead: 10240, multi: 760, roll26: "2,15,420", margin: 16998 },
-  { ac: 144, name: "Manachanallur", district: "Tiruchirappalli", electors21: "2,48,190", deletions: 29840, shifted: 17890, dead: 11150, multi: 800, roll26: "2,40,190", margin: 59836 },
-  { ac: 145, name: "Musiri", district: "Tiruchirappalli", electors21: "2,31,450", deletions: 28410, shifted: 16940, dead: 10690, multi: 780, roll26: "2,24,120", margin: 26836 },
-  { ac: 146, name: "Thuraiyur (SC)", district: "Tiruchirappalli", electors21: "2,28,410", deletions: 27140, shifted: 15910, dead: 10450, multi: 780, roll26: "2,21,480", margin: 22071 },
-  { ac: 147, name: "Perambalur (SC)", district: "Perambalur", electors21: "2,98,410", deletions: 36840, shifted: 23140, dead: 12690, multi: 1010, roll26: "2,88,410", margin: 21034 },
-  { ac: 148, name: "Kunnam", district: "Perambalur", electors21: "2,74,810", deletions: 32450, shifted: 19840, dead: 11760, multi: 850, roll26: "2,65,190", margin: 6329 },
-  { ac: 149, name: "Ariyalur", district: "Ariyalur", electors21: "2,68,410", deletions: 31240, shifted: 18910, dead: 11480, multi: 850, roll26: "2,59,120", margin: 3284 },
-  { ac: 150, name: "Jayankondam", district: "Ariyalur", electors21: "2,58,410", deletions: 29840, shifted: 17840, dead: 11200, multi: 800, roll26: "2,50,190", margin: 5452 },
-  { ac: 151, name: "Tittakudi (SC)", district: "Cuddalore", electors21: "2,28,410", deletions: 27140, shifted: 15910, dead: 10450, multi: 780, roll26: "2,21,480", margin: 21563 },
-  { ac: 152, name: "Vriddhachalam", district: "Cuddalore", electors21: "2,48,190", deletions: 29840, shifted: 17890, dead: 11150, multi: 800, roll26: "2,40,190", margin: 862 },
-  { ac: 153, name: "Neyveli", district: "Cuddalore", electors21: "2,19,410", deletions: 34120, shifted: 21240, dead: 11980, multi: 900, roll26: "2,08,120", margin: 977 },
-  { ac: 154, name: "Panruti", district: "Cuddalore", electors21: "2,41,890", deletions: 28940, shifted: 17450, dead: 10710, multi: 780, roll26: "2,34,120", margin: 4068 },
-  { ac: 155, name: "Cuddalore", district: "Cuddalore", electors21: "2,68,410", deletions: 38450, shifted: 24120, dead: 13180, multi: 1150, roll26: "2,56,190", margin: 5155 },
-  { ac: 156, name: "Kurinjipadi", district: "Cuddalore", electors21: "2,48,150", deletions: 29120, shifted: 17450, dead: 10890, multi: 780, roll26: "2,40,810", margin: 190 },
-  { ac: 157, name: "Bhuvanagiri", district: "Cuddalore", electors21: "2,58,410", deletions: 31240, shifted: 18940, dead: 11450, multi: 850, roll26: "2,49,190", margin: 8296 },
-  { ac: 158, name: "Chidambaram", district: "Cuddalore", electors21: "2,38,120", deletions: 32450, shifted: 19840, dead: 11760, multi: 850, roll26: "2,28,410", margin: 1693 },
-  { ac: 159, name: "Kattumannarkoil (SC)", district: "Cuddalore", electors21: "2,28,410", deletions: 27140, shifted: 15910, dead: 10450, multi: 780, roll26: "2,21,480", margin: 10565 },
-  { ac: 160, name: "Sirkazhi (SC)", district: "Mayiladuthurai", electors21: "2,48,190", deletions: 28940, shifted: 17450, dead: 10710, multi: 780, roll26: "2,40,810", margin: 12148 },
-  { ac: 161, name: "Mayiladuthurai", district: "Mayiladuthurai", electors21: "2,38,120", deletions: 31240, shifted: 18910, dead: 11480, multi: 850, roll26: "2,29,120", margin: 2742 },
-  { ac: 162, name: "Poompuhar", district: "Mayiladuthurai", electors21: "2,68,410", deletions: 32450, shifted: 19840, dead: 11760, multi: 850, roll26: "2,59,190", margin: 3299 },
-  { ac: 163, name: "Nagapattinam", district: "Nagapattinam", electors21: "2,09,140", deletions: 27140, shifted: 16120, dead: 10240, multi: 780, roll26: "2,01,480", margin: 7238 },
-  { ac: 164, name: "Kilvelur (SC)", district: "Nagapattinam", electors21: "1,88,410", deletions: 24120, shifted: 14120, dead: 9310, multi: 690, roll26: "1,81,120", margin: 16985 },
-  { ac: 165, name: "Vedaranyam", district: "Nagapattinam", electors21: "1,98,410", deletions: 26840, shifted: 15840, dead: 10240, multi: 760, roll26: "1,91,420", margin: 12329 },
-  { ac: 166, name: "Thiruthuraipoondi (SC)", district: "Tiruvarur", electors21: "2,38,120", deletions: 28410, shifted: 16940, dead: 10690, multi: 780, roll26: "2,30,190", margin: 30068 },
-  { ac: 167, name: "Mannargudi", district: "Tiruvarur", electors21: "2,58,410", deletions: 31240, shifted: 18940, dead: 11450, multi: 850, roll26: "2,49,190", margin: 37393 },
-  { ac: 168, name: "Thiruvarur", district: "Tiruvarur", electors21: "2,74,810", deletions: 34120, shifted: 21240, dead: 11980, multi: 900, roll26: "2,65,190", margin: 51174 },
-  { ac: 169, name: "Nannilam", district: "Tiruvarur", electors21: "2,68,410", deletions: 32450, shifted: 19840, dead: 11760, multi: 850, roll26: "2,59,190", margin: 4424 },
-  { ac: 170, name: "Thiruvidaimarudur (SC)", district: "Thanjavur", electors21: "2,58,410", deletions: 31240, shifted: 18910, dead: 11480, multi: 850, roll26: "2,50,120", margin: 10633 },
-  { ac: 171, name: "Kumbakonam", district: "Thanjavur", electors21: "2,68,410", deletions: 36840, shifted: 23140, dead: 12690, multi: 1010, roll26: "2,58,410", margin: 21383 },
-  { ac: 172, name: "Papanasam", district: "Thanjavur", electors21: "2,48,190", deletions: 29840, shifted: 17890, dead: 11150, multi: 800, roll26: "2,40,190", margin: 16273 },
-  { ac: 173, name: "Thiruvaiyaru", district: "Thanjavur", electors21: "2,61,480", deletions: 31240, shifted: 18910, dead: 11410, multi: 920, roll26: "2,53,120", margin: 53650 },
-  { ac: 174, name: "Thanjavur", district: "Thanjavur", electors21: "2,84,120", deletions: 48910, shifted: 34120, dead: 13450, multi: 1340, roll26: "2,61,190", margin: 47449 },
-  { ac: 175, name: "Orathanadu", district: "Thanjavur", electors21: "2,41,890", deletions: 28940, shifted: 17450, dead: 10710, multi: 780, roll26: "2,34,120", margin: 28835 },
-  { ac: 176, name: "Pattukkottai", district: "Thanjavur", electors21: "2,48,150", deletions: 29840, shifted: 17840, dead: 11200, multi: 800, roll26: "2,40,810", margin: 25269 },
-  { ac: 177, name: "Peravurani", district: "Thanjavur", electors21: "2,28,410", deletions: 27140, shifted: 15910, dead: 10450, multi: 780, roll26: "2,21,480", margin: 23512 },
-  { ac: 178, name: "Gandharvakottai (SC)", district: "Pudukkottai", electors21: "2,09,140", deletions: 24120, shifted: 14120, dead: 9310, multi: 690, roll26: "2,01,480", margin: 3998 },
-  { ac: 179, name: "Viralimalai", district: "Pudukkottai", electors21: "2,28,410", deletions: 26840, shifted: 15840, dead: 10240, multi: 760, roll26: "2,21,480", margin: 23644 },
-  { ac: 180, name: "Pudukkottai", district: "Pudukkottai", electors21: "2,48,190", deletions: 34120, shifted: 21240, dead: 11980, multi: 900, roll26: "2,38,190", margin: 4529 },
-  { ac: 181, name: "Thirumayam", district: "Pudukkottai", electors21: "2,21,480", deletions: 26840, shifted: 15840, dead: 10240, multi: 760, roll26: "2,14,420", margin: 1382 },
-  { ac: 182, name: "Alangudi", district: "Pudukkottai", electors21: "2,19,410", deletions: 27140, shifted: 16120, dead: 10240, multi: 780, roll26: "2,12,490", margin: 25847 },
-  { ac: 183, name: "Aranthangi", district: "Pudukkottai", electors21: "2,38,120", deletions: 28940, shifted: 17450, dead: 10710, multi: 780, roll26: "2,30,190", margin: 31093 },
-  { ac: 184, name: "Karaikudi", district: "Sivaganga", electors21: "3,09,140", deletions: 42120, shifted: 27840, dead: 12980, multi: 1300, roll26: "2,98,410", margin: 21589 },
-  { ac: 185, name: "Tiruppattur", district: "Sivaganga", electors21: "2,84,120", deletions: 34120, shifted: 21240, dead: 11980, multi: 900, roll26: "2,74,190", margin: 37774 },
-  { ac: 186, name: "Sivaganga", district: "Sivaganga", electors21: "2,95,140", deletions: 36840, shifted: 23140, dead: 12690, multi: 1010, roll26: "2,84,120", margin: 9253 },
-  { ac: 187, name: "Manamadurai (SC)", district: "Sivaganga", electors21: "2,68,410", deletions: 31240, shifted: 18910, dead: 11480, multi: 850, roll26: "2,59,120", margin: 14091 },
-  { ac: 188, name: "Melur", district: "Madurai", electors21: "2,58,410", deletions: 31240, shifted: 18940, dead: 11450, multi: 850, roll26: "2,49,190", margin: 35162 },
-  { ac: 189, name: "Madurai East", district: "Madurai", electors21: "3,28,450", deletions: 54120, shifted: 39840, dead: 12890, multi: 1390, roll26: "3,04,120", margin: 49195 },
-  { ac: 190, name: "Sholavandan (SC)", district: "Madurai", electors21: "2,19,410", deletions: 26840, shifted: 15840, dead: 10240, multi: 760, roll26: "2,12,490", margin: 17045 },
-  { ac: 191, name: "Madurai North", district: "Madurai", electors21: "2,54,120", deletions: 48910, shifted: 34120, dead: 13450, multi: 1340, roll26: "2,28,410", margin: 22916 },
-  { ac: 192, name: "Madurai South", district: "Madurai", electors21: "2,38,120", deletions: 46120, shifted: 32450, dead: 12450, multi: 1220, roll26: "2,12,490", margin: 6515 },
-  { ac: 193, name: "Madurai Central", district: "Madurai", electors21: "2,48,190", deletions: 49810, shifted: 36120, dead: 12450, multi: 1240, roll26: "2,21,190", margin: 34172 },
-  { ac: 194, name: "Madurai West", district: "Madurai", electors21: "3,09,140", deletions: 58910, shifted: 43120, dead: 14120, multi: 1670, roll26: "2,78,410", margin: 26896 },
-  { ac: 195, name: "Thiruparankundram", district: "Madurai", electors21: "3,18,450", deletions: 52140, shifted: 38410, dead: 12450, multi: 1280, roll26: "2,94,120", margin: 29489 },
-  { ac: 196, name: "Tirumangalam", district: "Madurai", electors21: "2,78,410", deletions: 34120, shifted: 21240, dead: 11980, multi: 900, roll26: "2,68,910", margin: 14087 },
-  { ac: 197, name: "Usilampatti", district: "Madurai", electors21: "2,74,810", deletions: 32450, shifted: 19840, dead: 11760, multi: 850, roll26: "2,65,190", margin: 7477 },
-  { ac: 198, name: "Andipatti", district: "Theni", electors21: "2,78,410", deletions: 34120, shifted: 21240, dead: 11980, multi: 900, roll26: "2,68,910", margin: 8538 },
-  { ac: 199, name: "Periyakulam (SC)", district: "Theni", electors21: "2,68,410", deletions: 32450, shifted: 19840, dead: 11760, multi: 850, roll26: "2,59,190", margin: 21321 },
-  { ac: 200, name: "Bodinayakanur", district: "Theni", electors21: "2,74,810", deletions: 34120, shifted: 21240, dead: 11980, multi: 900, roll26: "2,65,190", margin: 11021 },
-  { ac: 201, name: "Cumbum", district: "Theni", electors21: "2,84,120", deletions: 36840, shifted: 23140, dead: 12690, multi: 1010, roll26: "2,74,190", margin: 42413 },
-  { ac: 202, name: "Rajapalayam", district: "Virudhunagar", electors21: "2,38,120", deletions: 31240, shifted: 18910, dead: 11480, multi: 850, roll26: "2,28,410", margin: 3898 },
-  { ac: 203, name: "Srivilliputhur (SC)", district: "Virudhunagar", electors21: "2,48,190", deletions: 32450, shifted: 19840, dead: 11760, multi: 850, roll26: "2,39,190", margin: 12832 },
-  { ac: 204, name: "Sattur", district: "Virudhunagar", electors21: "2,41,890", deletions: 28940, shifted: 17450, dead: 10710, multi: 780, roll26: "2,34,120", margin: 11179 },
-  { ac: 205, name: "Sivakasi", district: "Virudhunagar", electors21: "2,68,410", deletions: 38450, shifted: 24120, dead: 13180, multi: 1150, roll26: "2,56,190", margin: 17329 },
-  { ac: 206, name: "Virudhunagar", district: "Virudhunagar", electors21: "2,28,410", deletions: 31240, shifted: 18940, dead: 11450, multi: 850, roll26: "2,20,190", margin: 21299 },
-  { ac: 207, name: "Aruppukkottai", district: "Virudhunagar", electors21: "2,21,480", deletions: 27140, shifted: 15910, dead: 10450, multi: 780, roll26: "2,15,420", margin: 39034 },
-  { ac: 208, name: "Tiruchuli", district: "Virudhunagar", electors21: "2,28,410", deletions: 26840, shifted: 15840, dead: 10240, multi: 760, roll26: "2,21,480", margin: 60992 },
-  { ac: 209, name: "Paramakudi (SC)", district: "Ramanathapuram", electors21: "2,58,410", deletions: 31240, shifted: 18910, dead: 11480, multi: 850, roll26: "2,49,190", margin: 13289 },
-  { ac: 210, name: "Tiruvadanai", district: "Ramanathapuram", electors21: "2,84,120", deletions: 34120, shifted: 21240, dead: 11980, multi: 900, roll26: "2,74,190", margin: 13852 },
-  { ac: 211, name: "Ramanathapuram", district: "Ramanathapuram", electors21: "3,09,140", deletions: 38450, shifted: 24120, dead: 13180, multi: 1150, roll26: "2,98,410", margin: 50479 },
-  { ac: 212, name: "Mudhukulathur", district: "Ramanathapuram", electors21: "3,18,450", deletions: 36840, shifted: 23140, dead: 12690, multi: 1010, roll26: "3,08,120", margin: 20721 },
-  { ac: 213, name: "Vilathikulam", district: "Thoothukudi", electors21: "2,19,410", deletions: 26840, shifted: 15840, dead: 10240, multi: 760, roll26: "2,12,490", margin: 38549 },
-  { ac: 214, name: "Thoothukkudi", district: "Thoothukudi", electors21: "2,84,120", deletions: 48910, shifted: 34120, dead: 13450, multi: 1340, roll26: "2,61,190", margin: 70586 },
-  { ac: 215, name: "Tiruchendur", district: "Thoothukudi", electors21: "2,48,190", deletions: 31240, shifted: 18940, dead: 11450, multi: 850, roll26: "2,40,190", margin: 25263 },
-  { ac: 216, name: "Srivaikuntam", district: "Thoothukudi", electors21: "2,28,410", deletions: 27140, shifted: 15910, dead: 10450, multi: 780, roll26: "2,21,480", margin: 2731 },
-  { ac: 217, name: "Ottapidaram (SC)", district: "Thoothukudi", electors21: "2,41,890", deletions: 28940, shifted: 17450, dead: 10710, multi: 780, roll26: "2,34,120", margin: 8510 },
-  { ac: 218, name: "Kovilpatti", district: "Thoothukudi", electors21: "2,68,410", deletions: 34120, shifted: 21240, dead: 11980, multi: 900, roll26: "2,58,910", margin: 12405 },
-  { ac: 219, name: "Sankarankovil (SC)", district: "Tenkasi", electors21: "2,48,150", deletions: 29840, shifted: 17840, dead: 11200, multi: 800, roll26: "2,40,810", margin: 5292 },
-  { ac: 220, name: "Vasudevanallur (SC)", district: "Tenkasi", electors21: "2,41,890", deletions: 28940, shifted: 17450, dead: 10710, multi: 780, roll26: "2,34,120", margin: 2358 },
-  { ac: 221, name: "Kadayanallur", district: "Tenkasi", electors21: "2,78,410", deletions: 34120, shifted: 21240, dead: 11980, multi: 900, roll26: "2,68,910", margin: 24307 },
-  { ac: 222, name: "Tenkasi", district: "Tenkasi", electors21: "2,84,120", deletions: 36840, shifted: 23140, dead: 12690, multi: 1010, roll26: "2,74,190", margin: 10699 },
-  { ac: 223, name: "Alangulam", district: "Tenkasi", electors21: "2,61,480", deletions: 31240, shifted: 18910, dead: 11410, multi: 920, roll26: "2,53,120", margin: 3511 },
-  { ac: 224, name: "Tirunelveli", district: "Tirunelveli", electors21: "2,84,120", deletions: 48910, shifted: 34120, dead: 13450, multi: 1340, roll26: "2,61,190", margin: 23107 },
-  { ac: 225, name: "Ambasamudram", district: "Tirunelveli", electors21: "2,48,190", deletions: 29840, shifted: 17890, dead: 11150, multi: 800, roll26: "2,40,190", margin: 16931 },
-  { ac: 226, name: "Palayamkottai", district: "Tirunelveli", electors21: "2,68,410", deletions: 46120, shifted: 32450, dead: 12450, multi: 1220, roll26: "2,44,190", margin: 52141 },
-  { ac: 227, name: "Nanguneri", district: "Tirunelveli", electors21: "2,58,410", deletions: 31240, shifted: 18940, dead: 11450, multi: 850, roll26: "2,49,190", margin: 16456 },
-  { ac: 228, name: "Radhapuram", district: "Tirunelveli", electors21: "2,68,410", deletions: 32450, shifted: 19840, dead: 11760, multi: 850, roll26: "2,59,190", margin: 5925 },
-  { ac: 229, name: "Kanniyakumari", district: "Kanniyakumari", electors21: "2,98,410", deletions: 38450, shifted: 24120, dead: 13180, multi: 1150, roll26: "2,84,120", margin: 16213 },
-  { ac: 230, name: "Nagercoil", district: "Kanniyakumari", electors21: "2,68,410", deletions: 42120, shifted: 27840, dead: 12980, multi: 1300, roll26: "2,54,120", margin: 11669 },
-  { ac: 231, name: "Colachal", district: "Kanniyakumari", electors21: "2,61,480", deletions: 31240, shifted: 18910, dead: 11410, multi: 920, roll26: "2,53,120", margin: 24828 },
-  { ac: 232, name: "Padmanabhapuram", district: "Kanniyakumari", electors21: "2,41,890", deletions: 28940, shifted: 17450, dead: 10710, multi: 780, roll26: "2,34,120", margin: 26885 },
-  { ac: 233, name: "Vilavancode", district: "Kanniyakumari", electors21: "2,48,150", deletions: 29840, shifted: 17840, dead: 11200, multi: 800, roll26: "2,40,810", margin: 28666 },
-  { ac: 234, name: "Killiyoor", district: "Kanniyakumari", electors21: "2,58,410", deletions: 31240, shifted: 18940, dead: 11450, multi: 850, roll26: "2,49,190", margin: 55437 }
-];
-
-    document.addEventListener("DOMContentLoaded", () => {
-      const tbody = document.getElementById("constituencyTableBody");
-      const searchInput = document.getElementById("searchInput");
-      const districtFilter = document.getElementById("districtFilter");
-      const matchBadge = document.getElementById("matchCountBadge");
-
-      const uniqueDistricts = [...new Set(constituencyData.map(d => d.district))].sort();
-      uniqueDistricts.forEach(dist => {
-        const opt = document.createElement("option");
-        opt.value = dist;
-        opt.textContent = dist;
-        districtFilter.appendChild(opt);
-      });
-
-      function renderTable(items) {
-        tbody.innerHTML = "";
-        matchBadge.textContent = `${items.length} of 234 Seats`;
-
-        items.forEach(row => {
-          const tr = document.createElement("tr");
-          tr.className = "hover:bg-slate-800/50 transition";
-          tr.innerHTML = `
-            <td class="py-3 px-4 text-slate-400 mono">#${row.ac}</td>
-            <td class="py-3 px-4 font-medium text-white">${row.name}</td>
-            <td class="py-3 px-4 text-slate-400">${row.district}</td>
-            <td class="py-3 px-4 text-right text-slate-400">${row.electors21}</td>
-            <td class="py-3 px-4 text-right text-rose-400 font-bold">${row.deletions.toLocaleString('en-IN')}</td>
-            <td class="py-3 px-4 text-right text-amber-300">${row.shifted.toLocaleString('en-IN')}</td>
-            <td class="py-3 px-4 text-right text-slate-400">${row.dead.toLocaleString('en-IN')}</td>
-            <td class="py-3 px-4 text-right text-emerald-400">${row.roll26}</td>
-            <td class="py-3 px-4 text-right text-cyan-300 font-semibold">${row.margin.toLocaleString('en-IN')}</td>
-          `;
-          tbody.appendChild(tr);
-        });
-      }
-
-      function handleFilter() {
-        const query = searchInput.value.toLowerCase().trim();
-        const selectedDist = districtFilter.value;
-
-        const filtered = constituencyData.filter(item => {
-          const matchesQuery = item.name.toLowerCase().includes(query) || 
-                               item.ac.toString().includes(query) || 
-                               item.district.toLowerCase().includes(query);
-          const matchesDistrict = (selectedDist === "ALL") || (item.district === selectedDist);
-          return matchesQuery && matchesDistrict;
-        });
-
-        renderTable(filtered);
-      }
-
-      searchInput.addEventListener("input", handleFilter);
-      districtFilter.addEventListener("change", handleFilter);
-
-      renderTable(constituencyData);
-
-      new Chart(document.getElementById("categoryChart"), {
-        type: "doughnut",
-        data: {
-          labels: ["Shifted / Absent", "Deceased", "Duplicates"],
-          datasets: [{
-            data: [6644881, 2694672, 398278],
-            backgroundColor: ["#f59e0b", "#f43f5e", "#6366f1"],
-            borderWidth: 0
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { position: "bottom", labels: { color: "#94a3b8", font: { size: 11 } } }
-          }
-        }
-      });
-
-      const topEight = [...constituencyData].sort((a, b) => b.deletions - a.deletions).slice(0, 8);
-      new Chart(document.getElementById("marginChart"), {
-        type: "bar",
-        data: {
-          labels: topEight.map(c => c.name),
-          datasets: [
-            {
-              label: "SIR Deletions",
-              data: topEight.map(c => c.deletions),
-              backgroundColor: "#f43f5e"
-            },
-            {
-              label: "Winning Margin",
-              data: topEight.map(c => c.margin),
-              backgroundColor: "#38bdf8"
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            x: { ticks: { color: "#94a3b8", font: { size: 9 } }, grid: { display: false } },
-            y: { ticks: { color: "#94a3b8" }, grid: { color: "#1e293b" } }
-          },
-          plugins: {
-            legend: { position: "bottom", labels: { color: "#94a3b8", font: { size: 11 } } }
-          }
-        }
-      });
-    });
-  </script>
-</body>
-</html>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Tamil Nadu SIR 2026 Data Repository</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+:root{--bg:#faf8f4;--card:#fff;--ink:#1d1d1f;--mut:#6b6b70;--line:#e3dfd6;--acc:#1f3864;--TVK:#d99a00;--DMK:#d32f2f;--ADMK:#2e7d32;--OTH:#7a7a80;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15171c;--card:#1e2128;--ink:#ecebe7;--mut:#a0a0a8;--line:#33363f;--acc:#8fb0ff}}
+:root[data-theme="dark"]{--bg:#15171c;--card:#1e2128;--ink:#ecebe7;--mut:#a0a0a8;--line:#33363f;--acc:#8fb0ff}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 Georgia,"Times New Roman",serif}
+.w{max-width:1100px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:34px;line-height:1.15;margin:6px 0 8px}h1 em{color:var(--acc)}h2{font-size:21px;margin:34px 0 8px}
+.k{font:600 11px/1 Arial,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
+p.s{color:var(--mut);max-width:760px;margin:4px 0}
+.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:18px 0}
+.c{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.c b{display:block;font:700 24px/1.2 Arial,sans-serif;color:var(--acc)}.c span{font:12px Arial,sans-serif;color:var(--mut)}
+.box{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:8px;padding:12px 16px;margin:12px 0}
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+table{border-collapse:collapse;width:100%;font:13px Arial,sans-serif;min-width:820px}
+th,td{padding:7px 9px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}th:nth-child(2),td:nth-child(2),th:first-child,td:first-child{text-align:left}
+th{cursor:pointer;background:var(--bg);position:sticky;top:0;font-size:12px}tr.r:hover{background:var(--bg);cursor:pointer}
+.p{display:inline-block;padding:1px 7px;border-radius:9px;color:#fff;font-size:11px;font-weight:700}
+.dt td{white-space:normal;text-align:left;background:var(--bg);font-size:13px;line-height:1.6}
+.bar{display:flex;gap:10px;margin:10px 0;flex-wrap:wrap}input,select{font:14px Arial,sans-serif;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)}
+svg{width:100%;height:auto;background:var(--card);border:1px solid var(--line);border-radius:10px}svg text{fill:var(--mut);font:11px Arial,sans-serif}
+.f{color:var(--mut);font:12px Arial,sans-serif;margin-top:30px}
+</style></head><body><div class="w">
+<div class="k">Special Intensive Revision · Tamil Nadu · 2025–26</div>
+<h1>SIR <em>Deletion</em> Data Repository</h1>
+<p class="s">Constituency-wise deletions from the SIR draft roll, matched with 2021 and 2026 election results and turnout for all 234 Tamil Nadu assembly constituencies. Click any column to sort, click any row for detail.</p>
+<div class="g" id="cards"></div>
+<div class="box"><b>Reading the data.</b> Deletions are concentrated in low-turnout, mostly urban seats. TVK won most of the heaviest-deletion seats, but that overlaps with the Chennai belt, so it is a correlation, not proof of cause. Whether removed voters leaned one way cannot be known without booth-level lists.</div>
+<h2>Deletions against winning margin</h2>
+<p class="s">Each dot is a constituency. Colour = 2026 winner. Both axes use the same kind of unit.</p><div class="bar"><select id="sm"><option value="0">Counts: names deleted vs winning margin (votes)</option><option value="1">Percentages: % deleted vs margin as % of valid votes</option></select></div><div id="sc"></div>
+<h2>By deletion level</h2><p class="s">Seats ranked by deletion % and split into five equal groups.</p>
+<div class="tw"><table id="q"></table></div>
+<h2>All 234 constituencies</h2>
+<div class="bar"><input id="s" placeholder="Search constituency…"><select id="f"><option value="">All winners</option><option>TVK</option><option>DMK</option><option>ADMK</option><option>Other</option></select></div>
+<div class="tw"><table id="t"><thead><tr id="h"></tr></thead><tbody></tbody></table></div>
+<div class="f"><b>Sources and limits.</b> 2021 and 2026 results, electors and turnout: Election Commission of India. Draft-roll deletions (deceased / shifted-absent / duplicate) and draft roll: Chief Electoral Officer, Tamil Nadu, via data.opencity.in. Published totals: 97,37,832 names removed; draft roll 5,43,76,755; about 74.07 lakh net removal at the 23 Feb final roll (DT Next); about 7.40 lakh first-time voters aged 18–19 reported statewide (CEO, via Onmanorama).
+Not available by constituency in the sources used: how many deleted names were later restored, and how many first-time voters were added. "Added after draft" is the 2026 poll roll minus the draft roll and mixes restored voters, new voters and later updates. Turnout = valid votes (excluding NOTA) ÷ registered electors. TVK did not contest in 2021. This page shows constituency totals only, not individual voters.</div>
+</div>
+<script>
+const R=[[1,"Gummidipoondi",281688,220286,"DMK",285000,14901,25940,1601,242558,254175,231585,"TVK","ADMK",27945],[2,"Ponneri (SC)",267368,208800,"INC",271854,10381,20052,2280,239141,251421,225954,"TVK","INC",55768],[3,"Tiruttani",291336,230959,"DMK",282731,9838,19277,1462,252154,262500,237588,"ADMK","TVK",5793],[4,"Thiruvallur",274982,212371,"DMK",273783,12207,21247,1511,238818,251111,225296,"TVK","DMK",24760],[5,"Poonamallee (SC)",358218,260865,"DMK",394899,18719,25628,2518,348034,368694,307323,"TVK","DMK",72740],[6,"Avadi",442831,298546,"DMK",470737,16514,48489,3041,402693,436522,344472,"TVK","DMK",76311],[7,"Maduravoyal",452195,271724,"DMK",442775,11971,103876,1521,325407,373321,292230,"TVK","DMK",61509],[8,"Ambattur",384377,237941,"DMK",374353,10121,58237,1484,304511,337081,258496,"TVK","DMK",58781],[9,"Madavaram",454474,300534,"DMK",495826,20024,86319,3156,386327,431866,360604,"TVK","DMK",94985],[10,"Thiruvottiyur",306005,198885,"DMK",290268,10544,55055,1863,222806,244931,206283,"TVK","CPI(M)",53564],[11,"Dr.Radhakrishnan Nagar",262980,185323,"DMK",235272,7000,48961,955,178356,199394,180645,"TVK","DMK",49668],[12,"Perambur",315942,198872,"DMK",297526,12247,83761,1337,200181,226345,203783,"TVK","DMK",53715],[13,"Kolathur",281197,171859,"DMK",290653,12994,89251,1567,186841,211833,183159,"TVK","DMK",8795],[14,"Villivakkam",255328,142648,"DMK",240466,8073,88838,849,142706,163416,140757,"TVK","DMK",17302],[15,"Thiru-Vi-Ka-Nagar (SC)",219438,132650,"DMK",223571,9314,47860,1869,164528,181658,143376,"TVK","DMK",22333],[16,"Egmore (SC)",193162,118095,"DMK",197465,10123,63646,1089,122607,138796,119043,"TVK","DMK",10804],[17,"Royapuram",192635,120290,"DMK",198576,10415,39918,1378,146865,159672,126897,"TVK","DMK",14249],[18,"Harbour",175785,100737,"DMK",180341,7857,60258,1709,110517,120142,99022,"DMK","TVK",11750],[19,"Chepauk-Thiruvallikeni",234067,135344,"DMK",240087,11562,76449,1230,150846,166050,140098,"DMK","TVK",7140],[20,"Thousand Lights",240096,134555,"DMK",238374,10441,85235,1305,141393,157551,131009,"TVK","DMK",15141],[21,"Anna Nagar",286090,163551,"DMK",280422,8819,108829,639,162135,188908,162376,"TVK","DMK",21363],[22,"Virugampakkam",291691,167524,"DMK",285947,8029,101429,1366,175123,200627,171801,"TVK","DMK",27086],[23,"Saidapet",279033,159169,"DMK",273717,11976,74443,809,186489,204177,159477,"TVK","DMK",28514],[24,"Thiyagarayanagar",245040,136497,"DMK",235497,9346,85745,908,139498,158791,133050,"TVK","ADMK",13027],[25,"Mylapore",270568,152143,"DMK",269260,4930,82479,259,181592,199496,149824,"TVK","DMK",28972],[26,"Velachery",314578,174972,"INC",317520,13429,112589,1503,189999,217208,183479,"TVK","ADMK",33305],[27,"Shozhinganallur",698893,385325,"DMK",702450,22742,190851,4846,484011,553978,445216,"TVK","DMK",96780],[28,"Alandur",389118,235843,"DMK",399330,14043,114818,3198,267271,301127,260307,"TVK","DMK",29609],[29,"Sriperumbudur (SC)",355267,262123,"INC",410034,14864,37086,2768,355316,381807,329927,"TVK","INC",54246],[30,"Pallavaram",436239,264245,"DMK",444498,23891,120948,4947,294712,337024,282075,"TVK","DMDK",54693],[31,"Tambaram",415663,246684,"DMK",415483,17210,100266,3652,294355,330181,277297,"TVK","DMK",35621],[32,"Chengalpattu",428440,271012,"DMK",445500,19846,81248,5174,339232,372889,322615,"TVK","DMK",35641],[33,"Thiruporur",294620,224747,"VCK",319534,10236,35270,2052,271976,294452,261161,"TVK","VCK",39351],[34,"Cheyyur (SC)",227468,177979,"VCK",228255,8213,22280,1901,195861,204049,186801,"ADMK","TVK",5668],[35,"Madurantakam (SC)",226715,184471,"ADMK",231642,8427,16707,1164,205344,212666,197454,"ADMK","TVK",7194],[36,"Uthiramerur",260462,209577,"DMK",274539,12925,22578,2012,237024,246248,226651,"TVK","DMK",14223],[37,"Kancheepuram",309192,226896,"DMK",317295,15826,31415,2741,267313,278841,245239,"TVK","ADMK",15488],[38,"Arakkonam (SC)",227320,169756,"ADMK",234322,11561,29238,1723,191800,200986,181441,"TVK","VCK",23121],[39,"Sholingur",278034,222870,"INC",285128,12688,21473,2000,248967,258076,233112,"TVK","PMK",5686],[40,"Katpadi",250228,184357,"DMK",251417,7354,27085,1227,215751,230148,202752,"TVK","ADMK",5870],[41,"Ranipet",267260,205830,"DMK",272941,11081,23916,1984,235960,248962,219829,"TVK","DMK",5787],[42,"Arcot",262476,207538,"DMK",265309,11154,17171,1168,235816,246786,225130,"ADMK","TVK",42720],[43,"Vellore",253536,178458,"DMK",253287,7114,46483,968,198722,214946,189770,"TVK","DMK",6777],[44,"Anaikattu",256727,196014,"DMK",264301,10969,23665,2022,227645,240640,215215,"ADMK","DMK",7081],[45,"Kilvaithinankuppam (SC)",227241,172326,"ADMK",236823,11440,16408,1593,207382,217021,188920,"TVK","ADMK",20255],[46,"Gudiyattam (SC)",290135,209931,"DMK",297202,11428,43024,4245,238505,252064,228277,"TVK","DMDK",10097],[47,"Vaniyambadi",250220,188505,"ADMK",263969,9851,18563,2751,232804,243320,211910,"IUML","TVK",2982],[48,"Ambur",238473,176461,"DMK",246669,10293,27381,2509,206486,214898,195116,"DMK","TVK",7131],[49,"Jolarpet",240869,195021,"DMK",247099,7064,11117,2225,226693,237465,212347,"ADMK","TVK",16083],[50,"Tiruppattur",239239,184298,"DMK",241674,7504,15671,1810,216689,227352,202461,"TVK","DMK",48263],[51,"Uthangarai (SC)",238299,186864,"ADMK",251351,10499,10617,1641,228594,235925,204649,"TVK","ADMK",5198],[52,"Bargur",248335,196266,"DMK",256365,10627,13133,1988,230617,240476,213329,"ADMK","TVK",4241],[53,"Krishnagiri",268189,209811,"ADMK",282962,11886,12469,1106,257501,269394,229045,"TVK","ADMK",18844],[54,"Veppanahalli",252085,203479,"ADMK",265403,13800,13185,1638,236780,246739,221038,"DMK","ADMK",138],[55,"Hosur",351771,246122,"DMK",368437,12290,29220,2136,324791,343040,276156,"ADMK","TVK",27803],[56,"Thalli",251215,192056,"CPI",256108,12843,13328,2143,227794,237961,204328,"CPI","BJP",5240],[57,"Palacodu",237391,205244,"ADMK",245576,4676,8978,1125,230797,240861,223965,"ADMK","TVK",39042],[58,"Pennagaram",246772,208546,"PMK",253790,3717,9583,998,239492,248832,227992,"TVK","PMK",3165],[59,"Dharmapuri",269773,215607,"PMK",270705,5874,14689,1340,248802,260979,237638,"PMK","TVK",20896],[60,"Pappireddipatti",265487,219656,"ADMK",263092,4368,9432,1715,247577,257016,235944,"ADMK","DMK",33114],[61,"Harur (SC)",250120,196316,"ADMK",252269,5834,7461,1725,237249,245971,219260,"ADMK","DMK",3329],[62,"Chengam (SC)",275419,222865,"DMK",287404,11304,14638,1858,259604,269423,241783,"ADMK","TVK",13278],[63,"Tiruvannamalai",286589,206642,"DMK",281178,10520,30077,1611,238970,250026,219281,"DMK","TVK",2455],[64,"Kilpennathur",253562,202925,"DMK",260539,9946,16034,1030,233529,241209,219350,"ADMK","DMK",30465],[65,"Kalasapakkam",243655,194839,"DMK",248693,9341,12973,1340,225039,233595,213704,"ADMK","DMK",26740],[66,"Polur",245195,200868,"ADMK",246966,7804,10992,992,227178,235091,210945,"TVK","DMDK",227],[67,"Arani",277727,219732,"ADMK",283123,16530,18605,1780,246208,256474,229455,"ADMK","DMK",5631],[68,"Cheyyar",259890,212565,"DMK",265698,13365,18843,770,232720,240008,221620,"ADMK","TVK",21081],[69,"Vandavasi (SC)",240654,184205,"DMK",248301,16940,23723,1146,206492,213574,190216,"DMK","ADMK",3333],[70,"Gingee",261167,204601,"DMK",260622,8997,15552,1153,234920,242992,216144,"PMK","DMK",12645],[71,"Mailam",220324,176105,"PMK",219553,7809,8527,689,202528,209098,188922,"ADMK","TVK",30041],[72,"Tindivanam (SC)",230570,181015,"ADMK",236279,9941,13279,962,212097,219300,195312,"VCK","ADMK",734],[73,"Vanur (SC)",226608,180845,"ADMK",235110,10176,20129,1122,203683,209885,191600,"DMK","TVK",7034],[74,"Viluppuram",262175,203890,"DMK",266318,9990,20051,1194,235083,245994,214849,"DMK","TVK",4119],[75,"Vikravandi",234841,192495,"DMK",244712,8949,11450,1517,222796,229182,208830,"PMK","TVK",910],[76,"Tirukkoyilur",254716,194178,"DMK",264896,11320,18697,1361,233518,243404,216818,"ADMK","TVK",285],[77,"Ulundurpettai",293464,242573,"DMK",304887,8457,7700,1317,287413,300789,269951,"DMK","ADMK",2277],[78,"Rishivandiyam",268323,212686,"DMK",282881,8650,10024,1643,262564,273641,244261,"DMK","TVK",4862],[79,"Sankarapuram",268594,214849,"DMK",280376,9375,13357,1483,256161,266003,235145,"ADMK","DMK",3440],[80,"Kallakurichi (SC)",286621,224601,"ADMK",292463,7315,13742,1266,270140,281622,248743,"TVK","ADMK",798],[81,"Gangavalli (SC)",239024,185252,"ADMK",234154,9609,11206,1756,211583,218375,195948,"ADMK","DMK",14404],[82,"Attur (SC)",254705,197909,"ADMK",245655,8638,14908,1541,220568,228219,207265,"ADMK","TVK",15318],[83,"Yercaud (ST)",284029,236945,"ADMK",287642,8832,13378,1708,263724,272937,252342,"ADMK","TVK",2189],[84,"Omalur",296192,247427,"ADMK",306130,8625,10524,1748,285233,294863,269686,"ADMK","TVK",14539],[85,"Mettur",286849,216195,"PMK",282129,9522,24327,2684,245596,255869,230311,"ADMK","DMK",19105],[86,"Edappadi",285298,246192,"ADMK",293749,9323,14950,2102,267374,276472,256922,"ADMK","IND",98110],[87,"Sankari",274307,230778,"ADMK",275901,8573,14036,1426,251866,260590,243068,"ADMK","TVK",9517],[88,"Salem (West)",299693,214945,"PMK",308892,13515,48521,2915,243941,258040,233355,"TVK","PMK",74867],[89,"Salem (North)",276022,200837,"DMK",273971,9510,38177,1861,224423,238685,209507,"TVK","DMK",14034],[90,"Salem (South)",260403,198122,"ADMK",256166,6142,35644,1052,213328,226880,207157,"TVK","DMK",33369],[91,"Veerapandi",260064,222293,"ADMK",266148,8685,15613,1378,240472,250504,235281,"TVK","ADMK",4071],[92,"Rasipuram (SC)",236580,194794,"DMK",235828,7169,12504,1330,214825,222304,203817,"TVK","BJP",14511],[93,"Senthamangalam (ST)",243556,197177,"DMK",249377,10882,15489,1955,221051,229482,208476,"TVK","ADMK",2655],[94,"Namakkal",257854,205474,"DMK",264052,12040,22541,1549,227922,237915,211523,"TVK","ADMK",11008],[95,"Paramathi-Velur",221664,182733,"ADMK",222632,9248,13302,1220,198862,205215,188396,"ADMK","DMK",308],[96,"Tiruchengodu",231133,183151,"DMK",232858,11018,19853,1040,200947,209099,190602,"TVK","ADMK",28172],[97,"Kumarapalayam",254468,200583,"ADMK",261913,15955,35069,1542,209347,220072,204659,"TVK","ADMK",7696],[98,"Erode (East)",228425,150491,"INC",229756,11676,51012,1558,165510,179592,161574,"TVK","INC",23966],[99,"Erode (West)",293099,203611,"DMK",304264,15100,56569,1872,230723,250217,220143,"TVK","DMK",22250],[100,"Modakkurichi",238932,179515,"BJP",230142,9596,20149,1465,198932,207697,189834,"TVK","BJP",2430],[101,"Dharapuram (SC)",258581,192088,"DMK",266127,24730,24121,2118,215158,222434,198886,"ADMK","DMK",16727],[102,"Kangayam",257190,198791,"DMK",267926,26477,29319,1664,210466,219586,202828,"ADMK","TVK",8133],[103,"Perundurai",227887,188654,"ADMK",240104,14563,19116,1440,204985,214451,199874,"ADMK","DMK",9693],[104,"Bhavani",238721,199306,"ADMK",244484,10469,17941,1802,214272,223221,206914,"ADMK","TVK",7396],[105,"Anthiyur",219615,175358,"DMK",224117,11833,11240,1759,199285,207413,185021,"ADMK","DMK",1260],[106,"Gobichettipalayam",256363,212974,"ADMK",257727,10512,14949,1102,231164,239198,218820,"TVK","DMK",16620],[107,"Bhavanisagar (SC)",260249,198562,"ADMK",266595,14203,23320,2183,226889,237629,212791,"TVK","ADMK",4569],[108,"Udhagamandalam",206039,139726,"INC",200100,5721,10513,1242,182624,188968,147179,"BJP","TVK",976],[109,"Gudalur (SC)",189221,137240,"ADMK",196781,6450,11696,835,177800,185460,150370,"DMK","ADMK",22833],[110,"Coonoor",192118,134720,"DMK",192286,6804,11615,1215,172652,177978,140674,"DMK","ADMK",8099],[111,"Mettuppalayam",296937,222350,"ADMK",313810,13818,28056,2038,269898,282235,243480,"TVK","DMK",7768],[112,"Avanashi (SC)",280560,210255,"ADMK",296817,20990,33064,2021,240742,253372,230037,"TVK","BJP",15373],[113,"Tiruppur (North)",379139,235930,"ADMK",407072,17190,91044,2827,296011,315863,262379,"TVK","ADMK",69992],[114,"Tiruppur (South)",276483,173276,"DMK",272295,10742,74203,2068,185282,197104,179170,"TVK","DMK",12901],[115,"Palladam",389786,259709,"ADMK",419197,24571,82448,5888,306290,329875,299597,"TVK","ADMK",37897],[116,"Sulur",317223,239043,"ADMK",338847,10624,32492,2215,293516,307699,272191,"TVK","ADMK",4790],[117,"Kavundampalayam",465345,307026,"ADMK",501711,13864,106557,3550,377740,422240,361875,"TVK","ADMK",42140],[118,"Coimbatore (North)",338712,201098,"ADMK",350451,14543,55234,2143,278531,296994,225089,"TVK","DMK",21992],[119,"Thondamuthur",326828,228896,"ADMK",349337,9490,63626,3275,272946,293379,257549,"ADMK","TVK",14725],[120,"Coimbatore (South)",252790,153864,"BJP",245548,10208,54140,1892,179308,188912,155740,"DMK","TVK",2271],[121,"Singanallur",325289,200589,"ADMK",341366,16628,68171,2145,254422,269997,219687,"TVK","INC",19139],[122,"Kinathukadavu",326920,230155,"ADMK",356808,14746,55848,2593,283621,305919,266200,"TVK","DMK",11710],[123,"Pollachi",227093,175762,"ADMK",229230,8786,22717,1352,196375,204008,180347,"DMK","ADMK",4627],[124,"Valparai (SC)",205530,143757,"ADMK",198090,6782,21058,1999,168251,173659,149756,"DMK","TVK",9371],[125,"Udumalaipettai",269760,192880,"ADMK",272017,16519,32267,2914,220317,231009,202426,"DMK","ADMK",2882],[126,"Madathukulam",248501,180854,"ADMK",243478,17238,16461,2901,206878,214837,187338,"DMK","AMMKMNKZ",15968],[127,"Palani",277298,204274,"DMK",279264,14677,34897,2600,227090,239881,207869,"ADMK","TVK",693],[128,"Oddanchatram",241240,200299,"DMK",243283,10956,20843,2328,209156,220263,200133,"DMK","BJP",43249],[129,"Athoor",291955,228376,"DMK",298568,16825,27588,3732,250423,262329,236371,"DMK","TVK",22368],[130,"Nilakkottai (SC)",244534,183545,"ADMK",253638,15382,23186,3282,211788,221565,196951,"TVK","DMK",2925],[131,"Natham",283531,223800,"ADMK",295156,15241,26757,4135,249023,261393,238544,"ADMK","DMK",11869],[132,"Dindigul",276820,193311,"ADMK",288716,20034,38390,2069,228223,242126,211191,"DMK","TVK",1131],[133,"Vedasandur",263561,212277,"DMK",275822,14876,25060,2036,233850,243998,226080,"DMK","ADMK",10063],[134,"Aravakurichi",213969,176245,"DMK",212072,6172,15697,506,189697,195538,180441,"DMK","TVK",19382],[135,"Karur",245356,206349,"DMK",240848,4325,19358,388,216777,230068,216290,"ADMK","TVK",1821],[136,"Krishnarayapuram (SC)",213056,179725,"DMK",213983,6497,10141,594,196751,203090,188832,"TVK","ADMK",3503],[137,"Kulithalai",227279,196265,"DMK",231459,6835,8370,807,215447,223376,208479,"DMK","TVK",579],[138,"Manapparai",289713,220739,"DMK",288309,11918,17534,2183,256674,268165,240267,"TVK","ADMK",1426],[139,"Srirangam",311716,237823,"DMK",315687,13711,28821,1616,271539,287214,254056,"TVK","DMK",33590],[140,"Tiruchirappalli (West)",269194,180982,"DMK",278128,12570,44140,629,220789,238980,195249,"DMK","TVK",4786],[141,"Tiruchirappalli (East)",255051,171321,"DMK",261369,13623,43365,826,203555,220240,181979,"TVK","DMK",27416],[142,"Thiruverumbur",293196,195595,"DMK",283287,11993,26545,1445,243304,259701,212838,"TVK","DMK",8705],[143,"Lalgudi",218131,173554,"DMK",224197,10050,8531,731,204885,212403,184823,"ADMK","TVK",2739],[144,"Manachanallur",244202,195652,"DMK",260833,18007,14885,780,227161,236632,209181,"DMK","TVK",12364],[145,"Musiri",232654,178614,"DMK",228200,12258,8497,892,206553,214146,188048,"TVK","DMK",17442],[146,"Thuraiyur (SC)",226152,174282,"DMK",228958,12626,12909,703,202720,210753,183729,"TVK","ADMK",9614],[147,"Perambalur (SC)",302758,238142,"DMK",309942,12965,14686,1725,280566,290731,252494,"TVK","DMK",14393],[148,"Kunnam",273526,219126,"DMK",280548,9995,8376,1801,260376,268155,230086,"DMK","ADMK",15557],[149,"Ariyalur",264971,223836,"DMK",265319,6211,6062,713,252333,263156,235217,"ADMK","DMK",24498],[150,"Jayankondam",266741,214504,"DMK",265571,6082,4501,799,254189,263862,228132,"PMK","DMK",18490],[151,"Tittakudi (SC)",219415,167185,"DMK",222516,7686,13138,1151,200541,209006,175170,"DMK","TVK",2629],[152,"Vriddhachalam",252911,195973,"INC",260361,8315,22311,1198,228537,240844,208431,"DMDK","TVK",2387],[153,"Neyveli",218666,162959,"DMK",206401,7604,17993,849,179955,191337,168012,"ADMK","DMK",10962],[154,"Panruti",245530,195726,"DMK",255988,10041,11505,1195,233247,241839,209860,"ADMK","VCK",10663],[155,"Cuddalore",239474,180765,"DMK",246926,11274,21084,1176,213392,223243,189484,"TVK","INC",15519],[156,"Kurinjipadi",243269,197569,"DMK",253801,10644,12790,1507,228860,238287,213336,"DMK","ADMK",7589],[157,"Bhuvanagiri",248629,196107,"ADMK",258545,13482,20085,1448,223530,233353,206629,"ADMK","DMK",2487],[158,"Chidambaram",251100,182150,"ADMK",251539,10066,20045,1322,220106,231325,195770,"DMK","ADMK",5747],[159,"Kattumannarkoil (SC)",229154,174913,"VCK",237500,9860,8051,998,218591,226509,187440,"VCK","PMK",33063],[160,"Sirkazhi (SC)",252621,190348,"DMK",257698,11654,11965,1313,232766,241432,199893,"DMK","ADMK",11417],[161,"Mayiladuthurai",246064,173573,"INC",245002,9435,8652,1075,225840,234622,187987,"INC","PMK",10845],[162,"Poompuhar",275903,207105,"DMK",280800,13770,15765,1749,249516,259332,218738,"DMK","ADMK",8260],[163,"Nagapattinam",197960,142665,"VCK",195394,7994,19983,1438,165979,174736,150847,"DMK","TVK",9781],[164,"Kilvelur (SC)",178764,142099,"CPI(M)",177860,4761,8550,951,163598,170633,151092,"CPI(M)","TVK",2278],[165,"Vedaranyam",192770,157387,"ADMK",194476,5378,7424,859,180815,187527,161653,"ADMK","DMK",7331],[166,"Thiruthuraipoondi (SC)",240072,184573,"CPI",243519,9873,14535,1325,217786,226940,190233,"CPI","TVK",12922],[167,"Mannargudi",260042,192269,"DMK",260397,11743,24090,1089,223475,234554,193695,"AMMKMNKZ","DMK",1566],[168,"Thiruvarur",282708,206637,"DMK",286973,13251,23153,1533,249036,260145,217050,"DMK","TVK",18148],[169,"Nannilam",272305,220754,"ADMK",284688,12075,15410,1403,255800,267576,230508,"ADMK","DMK",41724],[170,"Thiruvidaimarudur (SC)",259518,197206,"DMK",270497,16370,5272,843,248012,257014,208197,"DMK","TVK",14116],[171,"Kumbakonam",273097,195916,"DMK",275179,13059,18076,915,243129,254383,207328,"TVK","DMK",679],[172,"Papanasam",260941,195778,"DMK",269429,15048,6106,930,247345,256617,207007,"IUML","TVK",1065],[173,"Thiruvaiyaru",268590,210250,"DMK",276170,15039,10519,940,249672,258597,221163,"DMK","TVK",8555],[174,"Thanjavur",290936,192921,"DMK",281225,12084,30247,1313,237581,252841,197524,"TVK","DMK",16955],[175,"Orathanadu",243747,190973,"ADMK",253415,16447,10348,1248,225372,233758,194673,"DMK","TVK",35028],[176,"Pattukkottai",245863,176174,"DMK",251385,11459,4803,826,234297,242451,183007,"DMK","TVK",13754],[177,"Peravurani",220162,170080,"DMK",221261,9735,3902,974,206650,213974,175579,"DMK","ADMK",3162],[178,"Gandharvakottai (SC)",201607,156230,"CPI(M)",210274,10116,10935,1176,188047,196104,166491,"TVK","BJP",11039],[179,"Viralimalai",225189,193038,"ADMK",231958,8088,6982,2034,214854,225159,203546,"ADMK","TVK",62073],[180,"Pudukkottai",244029,179288,"DMK",252881,11818,23953,1195,215915,226009,189911,"DMK","TVK",1867],[181,"Thirumayam",227883,173462,"DMK",241087,11612,14665,1701,213109,220622,181667,"DMK","TVK",1492],[182,"Alangudi",217344,171140,"DMK",219252,7787,5834,1550,204081,212139,179810,"DMK","TVK",12977],[183,"Aranthangi",237024,167524,"INC",238660,8521,10329,1291,218519,229834,182150,"TVK","INC",10062],[184,"Karaikudi",317276,211107,"INC",326389,17210,14345,1345,293489,306124,228748,"TVK","INC",46074],[185,"Tiruppattur",291771,209913,"DMK",306783,19322,19731,2256,265474,275999,214963,"TVK","DMK",1],[186,"Sivaganga",301163,200774,"ADMK",308399,20355,17463,1493,269088,278609,213014,"TVK","ADMK",15081],[187,"Manamadurai (SC)",278605,201726,"DMK",288362,17000,19049,1259,251054,260203,207797,"TVK","DMK",1208],[188,"Melur",244996,181898,"ADMK",249816,5165,22559,1161,220931,230061,190172,"INC","TVK",2724],[189,"Madurai East",329209,235948,"DMK",351779,10714,23678,1162,316225,336738,270389,"TVK","DMK",16547],[190,"Sholavandan (SC)",218730,174400,"DMK",229545,8217,13666,1095,206567,215348,188509,"TVK","DMK",2678],[191,"Madurai North",243596,154992,"DMK",245296,6907,29116,524,208749,221326,161048,"TVK","DMK",18038],[192,"Madurai South",230133,146282,"DMK",223858,8724,46511,525,168098,180003,140891,"TVK","DMK",21529],[193,"Madurai Central",241913,147989,"DMK",223521,7829,27526,917,187249,199725,147930,"TVK","DMK",19128],[194,"Madurai West",307141,199920,"ADMK",311043,10397,44640,1079,254927,275689,215510,"TVK","DMK",11931],[195,"Thiruparankundram",321501,233776,"ADMK",334794,11936,27981,1190,293687,311705,254318,"TVK","DMK",41553],[196,"Thirumangalam",279598,219524,"ADMK",284179,11931,21722,1244,249282,262948,230047,"DMK","ADMK",23807],[197,"Usilampatti",286453,211481,"ADMK",286800,12612,17307,2439,254442,267969,223356,"TVK","ADMK",1805],[198,"Andipatti",278344,208207,"DMK",279183,11926,16002,2220,249035,257997,216301,"DMK","TVK",9554],[199,"Periyakulam (SC)",285471,199346,"DMK",289970,14303,17618,2068,255981,266570,209703,"TVK","VCK",19321],[200,"Bodinayakanur",278815,213392,"ADMK",277350,9559,12542,2285,252964,264386,219697,"DMK","TVK",6805],[201,"Cumbum",288262,200616,"DMK",283800,13538,20664,3014,246584,257323,209907,"TVK","DMK",751],[202,"Rajapalayam",239461,176833,"DMK",231157,11251,16665,1340,201901,214646,182267,"TVK","DMK",10605],[203,"Srivilliputhur (SC)",250640,183373,"ADMK",243752,11793,16481,1813,213665,224903,192598,"TVK","CPI",8581],[204,"Sattur",253363,190486,"DMK",241074,9908,10711,1654,218801,230149,198258,"DMK","BJP",5989],[205,"Sivakasi",261809,183320,"INC",243782,10274,17814,1150,214544,228465,192569,"TVK","INC",11670],[206,"Virudhunagar",224099,160147,"DMK",226140,12444,21302,1570,190824,200938,166878,"TVK","DMDK",9391],[207,"Aruppukkottai",223820,169878,"DMK",222248,9335,12555,1362,198996,208168,177721,"DMK","TVK",4943],[208,"Tiruchuli",221421,172071,"DMK",218332,8274,11022,1246,197790,205681,180825,"DMK","TVK",13485],[209,"Paramakudi (SC)",256158,180900,"DMK",257350,8625,19788,1700,227237,235109,189043,"DMK","TVK",3548],[210,"Tiruvadanai",291236,201047,"INC",302651,13806,12778,2628,273439,284130,219924,"TVK","INC",2513],[211,"Ramanathapuram",308443,213345,"DMK",327721,15005,7427,3302,301987,312463,236623,"DMK","TVK",12459],[212,"Mudhukulathur",310954,220664,"DMK",320968,14003,16508,1794,288663,299702,230944,"DMK","TVK",16598],[213,"Vilathikulam",216923,166133,"DMK",214620,7491,8415,767,197947,205465,174172,"DMK","TVK",8228],[214,"Thoothukkudi",285497,186838,"DMK",287496,10576,39231,1228,236461,250803,203859,"TVK","DMK",37731],[215,"Tiruchendur",245144,173482,"DMK",245246,10180,11674,761,222631,233061,185328,"DMK","TVK",5872],[216,"Srivaikuntam",224689,163630,"INC",227530,8363,11340,773,207054,214630,175842,"TVK","ADMK",1186],[217,"Ottapidaram (SC)",251597,176272,"DMK",255199,10931,10476,1256,232536,244686,195238,"TVK","DMK",29083],[218,"Kovilpatti",266625,179804,"ADMK",260594,9651,17580,1834,231529,242359,193639,"DMK","TVK",843],[219,"Sankarankovil (SC)",254243,181381,"DMK",254719,11071,13593,1534,228521,239035,195920,"ADMK","TVK",6489],[220,"Vasudevanallur (SC)",241748,173710,"DMK",252231,16103,12501,2031,221596,229179,189158,"DMK","BJP",6583],[221,"Kadayanallur",290432,204318,"ADMK",293246,14182,17501,4120,257443,269723,221424,"DMK","ADMK",6253],[222,"Tenkasi",292538,212949,"INC",305501,17445,15790,1801,270465,282002,234314,"DMK","ADMK",10299],[223,"Alangulam",260688,201692,"ADMK",269394,11338,11799,1093,245164,255730,219875,"DMK","ADMK",7798],[224,"Tirunelveli",292411,195496,"BJP",305804,19535,20174,2410,263685,276296,217708,"TVK","DMK",11414],[225,"Ambasamudram",245003,176008,"ADMK",260511,16665,24086,1750,218010,228246,190135,"ADMK","INC",10245],[226,"Palayamkottai",273557,159444,"DMK",279819,16107,18009,1941,243762,257498,179769,"DMK","TVK",13805],[227,"Nanguneri",277865,190985,"INC",298476,18618,32356,3286,244216,257480,208698,"TVK","INC",16419],[228,"Radhapuram",270760,186407,"DMK",273715,12384,25023,2613,233695,247310,199462,"TVK","DMK",12313],[229,"Kanniyakumari",293657,224024,"ADMK",302250,10274,15860,2047,274069,289561,238325,"ADMK","DMK",214],[230,"Nagercoil",270845,183255,"BJP",271185,9844,16301,1711,243329,259361,195833,"DMK","TVK",7570],[231,"Colachal",269287,182091,"INC",276754,11044,12115,2207,251388,266055,198432,"INC","TVK",2833],[232,"Padmanabhapuram",240853,169120,"DMK",245824,7980,12034,1670,224140,237160,179940,"CPI(M)","TVK",15569],[233,"Vilavancode",250065,167054,"INC",242756,8905,17509,1982,214360,228697,174099,"INC","TVK",20970],[234,"Killiyoor",255347,169164,"INC",254103,8903,10755,2232,232213,247289,177032,"INC","TVK",1311]];
+const D=R.map(r=>{const[ac,n,e21,t21,w21,pre,dec,sh,dup,dr,e26,t26,w,ru,m]=r,del=dec+sh+dup;return{ac,n,e21,t21,w21,pre,dec,sh,dup,dr,e26,t26,w,ru,m,del,dp:del/pre,t1:t21/e21,t2:t26/e26,add:e26-dr}});
+const C=k=>({TVK:'var(--TVK)',DMK:'var(--DMK)',ADMK:'var(--ADMK)'}[k]||'var(--OTH)');
+const P=k=>`<span class="p" style="background:${C(k)}">${k}</span>`,N=x=>x.toLocaleString('en-IN'),Z=x=>(x*100).toFixed(1)+'%';
+const sum=k=>D.reduce((a,d)=>a+d[k],0);
+document.getElementById('cards').innerHTML=[[N(sum('pre')),'Pre-SIR roll (Nov 2025)'],[N(sum('del')),'Deleted in draft roll ('+Z(sum('del')/sum('pre'))+')'],[N(sum('sh')),'of which shifted / absent ('+Z(sum('sh')/sum('del'))+')'],[N(sum('e26')),'Roll used for 2026 poll'],[Z(sum('t21')/sum('e21'))+' → '+Z(sum('t26')/sum('e26')),'Turnout 2021 → 2026'],[D.filter(d=>d.w=='TVK').length+' / 234','Seats won by TVK']].map(c=>`<div class="c"><b>${c[0]}</b><span>${c[1]}</span></div>`).join('');
+// scatter
+function scat(pc){const X=d=>pc?d.dp:d.del,Y=d=>pc?d.m/d.t26:d.m,xm=Math.max(...D.map(X)),W=720,H=330,l=52,b=34,mx=Math.max(...D.map(Y)),px=d=>l+X(d)/xm*(W-l-10),py=d=>H-b-Y(d)/mx*(H-b-10),fx=v=>pc?(v*100).toFixed(0)+'%':Math.round(v/1000)+'k',fy=fx;let s=`<svg viewBox="0 0 ${W} ${H}">`;
+for(let i=0;i<=4;i++){const x=l+i/4*(W-l-10);s+=`<text x="${x}" y="${H-12}" text-anchor="middle">${fx(i/4*xm)}</text>`;const y=H-b-i/4*(H-b-10);s+=`<line x1="${l}" x2="${W-10}" y1="${y}" y2="${y}" stroke="var(--line)"/><text x="${l-6}" y="${y+4}" text-anchor="end">${fy(i/4*mx)}</text>`}
+D.forEach(d=>s+=`<circle cx="${px(d)}" cy="${py(d)}" r="4" fill="${C(d.w)}" fill-opacity=".75"><title>${d.n}: ${Z(d.dp)} deleted, margin ${N(d.m)}</title></circle>`);
+s+=`<text x="${W/2}" y="${H-1}" text-anchor="middle">${pc?'x: names deleted as % of pre-SIR roll · y: winning margin as % of valid votes':'x: names deleted · y: winning margin (votes)'}</text></svg>`;document.getElementById('sc').innerHTML=s}
+document.getElementById('sm').onchange=e=>scat(+e.target.value);scat(0);
+// groups
+{const S=[...D].sort((a,b)=>a.dp-b.dp),sz=[47,47,46,47,47];let i=0,h='<tr><th>Group</th><th>Avg deleted</th><th>2021 turnout</th><th>2026 turnout</th><th>Votes cast change</th><th>TVK</th><th>DMK</th><th>ADMK</th></tr>';
+sz.forEach((n,g)=>{const G=S.slice(i,i+=n),a=k=>G.reduce((x,d)=>x+d[k],0)/G.length,s=k=>G.reduce((x,d)=>x+d[k],0),c=w=>G.filter(d=>d.w==w).length;
+h+=`<tr><td>${g+1}${g==0?' (lowest)':g==4?' (highest)':''}</td><td>${Z(a('dp'))}</td><td>${Z(a('t1'))}</td><td>${Z(a('t2'))}</td><td>+${((s('t26')/s('t21')-1)*100).toFixed(1)}%</td><td>${c('TVK')} / ${n}</td><td>${c('DMK')}</td><td>${c('ADMK')}</td></tr>`});document.getElementById('q').innerHTML=h}
+// main table
+const cols=[['ac','AC'],['n','Constituency'],['del','Deleted'],['dp','Deleted %'],['sh','Shifted/absent'],['t1','Turnout 2021'],['t2','Turnout 2026'],['w','2026 winner'],['ru','Runner-up'],['m','Margin']];
+let key='dp',dir=-1,open=null;const H=document.getElementById('h'),B=document.querySelector('#t tbody');
+H.innerHTML=cols.map(c=>`<th data-k="${c[0]}">${c[1]}</th>`).join('');
+H.onclick=e=>{const k=e.target.dataset.k;if(!k)return;dir=key==k?-dir:-1;key=k;draw()};
+['s','f'].forEach(i=>document.getElementById(i).oninput=draw);
+function draw(){const q=document.getElementById('s').value.toLowerCase(),f=document.getElementById('f').value;
+let L=D.filter(d=>d.n.toLowerCase().includes(q)&&(!f||(f=='Other'?!['TVK','DMK','ADMK'].includes(d.w):d.w==f)));
+L.sort((a,b)=>(a[key]>b[key]?1:-1)*dir*(key=='n'||key=='w'||key=='ru'?-1:1)*(key=='n'||key=='w'||key=='ru'?-1:1));
+B.innerHTML=L.map(d=>`<tr class="r" data-a="${d.ac}"><td>${d.ac}</td><td>${d.n}</td><td>${N(d.del)}</td><td>${Z(d.dp)}</td><td>${N(d.sh)}</td><td>${Z(d.t1)}</td><td>${Z(d.t2)}</td><td>${P(d.w)}</td><td>${d.ru}</td><td>${N(d.m)}</td></tr>`+(open==d.ac?`<tr class="dt"><td colspan="10"><b>${d.n}</b> · 2021: ${N(d.e21)} electors, ${N(d.t21)} valid votes (${Z(d.t1)}), won by ${d.w21}. Pre-SIR roll ${N(d.pre)}; draft deletions ${N(d.del)} (deceased ${N(d.dec)}, shifted/absent ${N(d.sh)}, duplicate ${N(d.dup)}); draft roll ${N(d.dr)}. 2026 poll roll ${N(d.e26)} (${N(d.add)} added after draft; restored vs new voters not split by seat), ${N(d.t26)} valid votes (${Z(d.t2)}). Winner ${d.w} by ${N(d.m)} over ${d.ru}. Deletions are ${(d.del/d.m).toFixed(1)}× the winning margin.</td></tr>`:'')).join('')}
+B.onclick=e=>{const r=e.target.closest('tr.r');if(!r)return;open=open==r.dataset.a?null:+r.dataset.a;draw()};draw();
+</script></body></html>
